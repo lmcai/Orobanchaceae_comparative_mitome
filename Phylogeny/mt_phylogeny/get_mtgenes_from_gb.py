@@ -1,4 +1,7 @@
 from Bio import SeqIO
+from Bio.SeqFeature import SeqFeature, FeatureLocation
+import os
+
 #x=open('/Users/lcai/Dropbox/Parasitic_plant_mitonuclear_coevolution/Comparative_mitogenome/mt_gene.txt').readlines()
 #x=[i.strip() for i in x]
 
@@ -54,3 +57,69 @@ for rec in recs:
 	d=out.write('>Aeginetia_indica_NC069194\n')
 	d=out.write(str(rec.seq)+'\n')
 	out.close()
+
+
+
+#########################
+#Get intronic regions of nad genes and rrn genes
+
+files=os.listdir('./')
+for f in files:
+	try:
+		records = SeqIO.parse(f, "genbank")
+		#initiate locations of nad1 exon2-3; nad2 exon1-2, exon3-4-5; nad5 exon 1-2, exon 4-5
+		nad1_exon23_locations = []
+		nad2_exon12_locations = []
+		nad2_exon345_locations = []
+		nad5_exon12_locations = []
+		nad5_exon45_locations = []
+		for rec in records:
+			for feature in rec.features:
+				#get rrn18 and rrn26
+				if feature.type=='gene':
+					gene_name=feature.qualifiers['gene'][0]
+					if gene_name=='rrn18' or gene_name=='rrn26':
+						outfile=open(gene_name+'.fas','a')
+						f=f.split('.')[0]
+						d=outfile.write('>'+f.split('_')[0]+'_'+f.split('_')[1]+'\n')
+						d=outfile.write(str(feature.extract(rec).seq)+'\n')
+						outfile.close()					
+				#get nad1,nad2,nad5
+				if feature.type=='exon':
+					try:gene_name=feature.qualifiers['gene'][0]
+					except KeyError:pass
+					exon_number=feature.qualifiers['number'][0]
+					#write individual exons:
+					if (gene_name=='nad1' and exon_number=='1') or (gene_name=='nad1' and exon_number=='4') or (gene_name=='nad1' and exon_number=='5'):
+						outfile=open(gene_name+'_exon'+exon_number+'.fas','a')
+						f=f.split('.')[0]
+						d=outfile.write('>'+f.split('_')[0]+'_'+f.split('_')[1]+'\n')
+						d=outfile.write(str(feature.extract(rec).seq)+'\n')
+						outfile.close()
+					#write multiple gene blocks, this involved combining regions using the 'sum' function
+					elif (gene_name=='nad1' and exon_number=='2') or (gene_name=='nad1' and exon_number=='3'):
+						nad1_exon23_locations.append(feature.location)
+					elif (gene_name=='nad2' and exon_number=='1') or (gene_name=='nad2' and exon_number=='2'):
+						nad2_exon12_locations.append(feature.location)
+					elif (gene_name=='nad2' and exon_number=='3') or (gene_name=='nad2' and exon_number=='5'):
+						nad2_exon345_locations.append(feature.location)
+					elif (gene_name=='nad5' and exon_number=='1') or (gene_name=='nad2' and exon_number=='2'):
+						nad5_exon12_locations.append(feature.location)
+					elif (gene_name=='nad5' and exon_number=='4') or (gene_name=='nad2' and exon_number=='5'):
+						nad5_exon45_locations.append(feature.location)
+			
+		sorted_nad1_exon23_locations = sorted(nad1_exon23_locations, key=lambda x: x.start)
+		combined_nad1_exon23_location = sum(sorted_nad1_exon23_locations[1:], sorted_nad1_exon23_locations[0])
+		sorted_nad2_exon12_locations = sorted(nad2_exon12_locations, key=lambda x: x.start)
+		combined_nad2_exon12_location = sum(sorted_nad2_exon12_locations[1:], sorted_nad2_exon12_locations[0])
+		sorted_nad2_exon345_locations = sorted(nad2_exon345_locations, key=lambda x: x.start)
+		combined_nad2_exon345_location = sum(sorted_nad2_exon345_locations[1:], sorted_nad2_exon345_locations[0])
+		sorted_nad5_exon12_locations = sorted(nad5_exon12_locations, key=lambda x: x.start)
+		combined_nad5_exon12_location = sum(sorted_nad5_exon12_locations[1:], sorted_nad5_exon12_locations[0])
+		sorted_nad5_exon45_locations = sorted(nad5_exon45_locations, key=lambda x: x.start)
+		combined_nad5_exon45_location = sum(sorted_nad5_exon45_locations[1:], sorted_nad5_exon45_locations[0])
+
+				
+	except:
+		print(f)
+		pass
