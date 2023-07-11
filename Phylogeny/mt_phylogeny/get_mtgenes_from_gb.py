@@ -128,9 +128,9 @@ for f in files:
 						nad2_exon12_locations.append(feature.location)
 					elif (gene_name=='nad2' and exon_number=='3') or (gene_name=='nad2' and exon_number=='5'):
 						nad2_exon345_locations.append(feature.location)
-					elif (gene_name=='nad5' and exon_number=='1') or (gene_name=='nad2' and exon_number=='2'):
+					elif (gene_name=='nad5' and exon_number=='1') or (gene_name=='nad5' and exon_number=='2'):
 						nad5_exon12_locations.append(feature.location)
-					elif (gene_name=='nad5' and exon_number=='4') or (gene_name=='nad2' and exon_number=='5'):
+					elif (gene_name=='nad5' and exon_number=='4') or (gene_name=='nad5' and exon_number=='5'):
 						nad5_exon45_locations.append(feature.location)
 			if len(nad1_exon23_locations)>1:
 				sorted_nad1_exon23_locations = sorted(nad1_exon23_locations, key=lambda x: x.start)
