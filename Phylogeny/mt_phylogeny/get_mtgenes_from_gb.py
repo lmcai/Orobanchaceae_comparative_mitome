@@ -64,6 +64,7 @@ for rec in recs:
 #Get intronic regions of nad genes and rrn genes
 
 files=os.listdir('./')
+files=[f for f in files if f.endswith('gb')]
 
 #get nad1,nad2,nad5 individual exons
 for f in files:
@@ -109,18 +110,19 @@ for f in files:
 	try:
 		records = SeqIO.parse(f, "genbank")
 		#initiate locations of nad1 exon2-3; nad2 exon1-2, exon3-4-5; nad5 exon 1-2, exon 4-5
-		nad1_exon23_locations = []
-		nad2_exon12_locations = []
-		nad2_exon345_locations = []
-		nad5_exon12_locations = []
-		nad5_exon45_locations = []
 		for rec in records:
+			nad1_exon23_locations = []
+			nad2_exon12_locations = []
+			nad2_exon345_locations = []
+			nad5_exon12_locations = []
+			nad5_exon45_locations = []
+			for feature in rec.features:
 				if feature.type=='exon':
 					try:gene_name=feature.qualifiers['gene'][0]
 					except KeyError:pass
 					exon_number=feature.qualifiers['number'][0]
 					#write multiple gene blocks, this involved combining regions using the 'sum' function
-					elif (gene_name=='nad1' and exon_number=='2') or (gene_name=='nad1' and exon_number=='3'):
+					if (gene_name=='nad1' and exon_number=='2') or (gene_name=='nad1' and exon_number=='3'):
 						nad1_exon23_locations.append(feature.location)
 					elif (gene_name=='nad2' and exon_number=='1') or (gene_name=='nad2' and exon_number=='2'):
 						nad2_exon12_locations.append(feature.location)
@@ -130,18 +132,46 @@ for f in files:
 						nad5_exon12_locations.append(feature.location)
 					elif (gene_name=='nad5' and exon_number=='4') or (gene_name=='nad2' and exon_number=='5'):
 						nad5_exon45_locations.append(feature.location)
-			
-		sorted_nad1_exon23_locations = sorted(nad1_exon23_locations, key=lambda x: x.start)
-		combined_nad1_exon23_location = sum(sorted_nad1_exon23_locations[1:], sorted_nad1_exon23_locations[0])
-		sorted_nad2_exon12_locations = sorted(nad2_exon12_locations, key=lambda x: x.start)
-		combined_nad2_exon12_location = sum(sorted_nad2_exon12_locations[1:], sorted_nad2_exon12_locations[0])
-		sorted_nad2_exon345_locations = sorted(nad2_exon345_locations, key=lambda x: x.start)
-		combined_nad2_exon345_location = sum(sorted_nad2_exon345_locations[1:], sorted_nad2_exon345_locations[0])
-		sorted_nad5_exon12_locations = sorted(nad5_exon12_locations, key=lambda x: x.start)
-		combined_nad5_exon12_location = sum(sorted_nad5_exon12_locations[1:], sorted_nad5_exon12_locations[0])
-		sorted_nad5_exon45_locations = sorted(nad5_exon45_locations, key=lambda x: x.start)
-		combined_nad5_exon45_location = sum(sorted_nad5_exon45_locations[1:], sorted_nad5_exon45_locations[0])
-				
+			if len(nad1_exon23_locations)>1:
+				sorted_nad1_exon23_locations = sorted(nad1_exon23_locations, key=lambda x: x.start)
+				combined_nad1_exon23_location = FeatureLocation(sorted_nad1_exon23_locations[0].start, sorted_nad1_exon23_locations[-1].end)
+				outfile=open('nad1_exon23.fas','a')
+				f=f.split('.')[0]
+				d=outfile.write('>'+f.split('_')[0]+'_'+f.split('_')[1]+'\n')
+				d=outfile.write(str(combined_nad1_exon23_location.extract(rec.seq))+'\n')
+				outfile.close()
+			if len(nad2_exon12_locations)>1:
+				sorted_nad2_exon12_locations = sorted(nad2_exon12_locations, key=lambda x: x.start)
+				combined_nad2_exon12_location = FeatureLocation(sorted_nad2_exon12_locations[0].start, sorted_nad2_exon12_locations[-1].end)
+				outfile=open('nad2_exon12.fas','a')
+				f=f.split('.')[0]
+				d=outfile.write('>'+f.split('_')[0]+'_'+f.split('_')[1]+'\n')
+				d=outfile.write(str(combined_nad2_exon12_location.extract(rec.seq))+'\n')
+				outfile.close()
+			if len(nad2_exon345_locations)>1:
+				sorted_nad2_exon345_locations = sorted(nad2_exon345_locations, key=lambda x: x.start)
+				combined_nad2_exon345_location = FeatureLocation(sorted_nad2_exon345_locations[0].start, sorted_nad2_exon345_locations[-1].end)
+				outfile=open('nad2_exon345.fas','a')
+				f=f.split('.')[0]
+				d=outfile.write('>'+f.split('_')[0]+'_'+f.split('_')[1]+'\n')
+				d=outfile.write(str(combined_nad2_exon345_location.extract(rec.seq))+'\n')
+				outfile.close()
+			if len(nad5_exon12_locations)>1:
+				sorted_nad5_exon12_locations = sorted(nad5_exon12_locations, key=lambda x: x.start)
+				combined_nad5_exon12_location = FeatureLocation(sorted_nad5_exon12_locations[0].start, sorted_nad5_exon12_locations[-1].end)
+				outfile=open('nad5_exon12.fas','a')
+				f=f.split('.')[0]
+				d=outfile.write('>'+f.split('_')[0]+'_'+f.split('_')[1]+'\n')
+				d=outfile.write(str(combined_nad5_exon12_location.extract(rec.seq))+'\n')
+				outfile.close()
+			if len(nad5_exon45_locations)>1:
+				sorted_nad5_exon45_locations = sorted(nad5_exon45_locations, key=lambda x: x.start)
+				combined_nad5_exon45_location = FeatureLocation(sorted_nad5_exon45_locations[0].start, sorted_nad5_exon45_locations[-1].end)
+				outfile=open('nad5_exon45.fas','a')
+				f=f.split('.')[0]
+				d=outfile.write('>'+f.split('_')[0]+'_'+f.split('_')[1]+'\n')
+				d=outfile.write(str(combined_nad5_exon45_location.extract(rec.seq))+'\n')
+				outfile.close()
 	except:
 		print(f)
 		pass
