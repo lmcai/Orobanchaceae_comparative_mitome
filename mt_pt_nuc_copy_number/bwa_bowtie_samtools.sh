@@ -16,3 +16,8 @@ bwa index $1.fasta
 bwa mem -t16 -C $1.fasta ../../cleaned_reads/$1.R1.fq ../../cleaned_reads/$1.R2.fq | samtools sort -@16 -o $1.sort.bam
 bwa mem -t16 -C $1.fasta ../../cleaned_reads/$2 ../../cleaned_reads/$3 | samtools sort -@16 -o $1.sort.bam
 samtools depth $1.sort.bam > $1.cov.tsv
+
+bowtie2-build $1.fasta $1
+bowtie2 --very-sensitive-local -p 16 -x $1 -1 ../../cleaned_reads/$1.R1.fq -2 ../../cleaned_reads/$1.R2.fq -S $1.sam
+samtools sort -@16 $1.sam -o $1.sort.bam
+samtools depth $1.sort.bam > $1.cov.tsv
