@@ -12,3 +12,6 @@ bedtools coverage -d -a pt.bed -b all_mtpt.bed
 ```
 
 # II. Repeat
+Use `ROUSFinder2.0.py` to identify repeat with size >15 bp. The batch file to execute it across all species is `ROUSFinder_batch.sh`
+
+ROUSFinder will incorrectly identify long single-copy sequences as repeats somehow. Use `summarize_ROUSfinder_result.sh` to remove these and calculate the total size of repeats.
