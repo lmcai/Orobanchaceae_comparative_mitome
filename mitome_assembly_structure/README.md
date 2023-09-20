@@ -1,3 +1,4 @@
+*I. MTPT
 1. Calculate mtpt proportion for each species: `mtpt_characterization.sh`
 
 This script outputs the number of site in the mito assembly with pt origin (similarity based)
@@ -9,3 +10,5 @@ Use `mtpt_pt_bias.sh` to blast mtpt to Rehmannia plastome, then `cat` all bed fi
 ```
 bedtools coverage -d -a pt.bed -b all_mtpt.bed
 ```
+
+*II. Repeat
