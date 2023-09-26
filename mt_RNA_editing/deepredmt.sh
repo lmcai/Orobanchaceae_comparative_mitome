@@ -31,6 +31,6 @@ for k in a.keys():
 	editing_site_num=[]
 	for j in genes:
 		try:editing_site_num.append(a[k][j])
-		except KeyError:editing_site_num.append(0)
+		except KeyError:editing_site_num.append('NA')
 	editing_site_num=[str(i) for i in editing_site_num]
 	out.write(k+'\t'+'\t'.join(editing_site_num)+'\n')
