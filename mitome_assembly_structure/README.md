@@ -18,7 +18,7 @@ ROUSFinder will incorrectly identify long single-copy sequences as repeats someh
 
 2. de bruijn assembly graph based repeat identification
 
-Criteria for repeat identification: a. have >3 edges in de bruijn graph; b. >1.5 x kmer coverage than the whole-graph average
+Criteria for repeat identification: a. have >= 4 edges in de bruijn graph; b. present in the final assembly that is manually curated; c. >~1.5 x kmer coverage than the whole-graph average
 
 First get a list of contig included in the final assembly
 ```
@@ -60,3 +60,6 @@ grep '^L' Orthocarpus_attenuatus_LM105.gfa | awk '{print $2,$4}' | sed 's/_/\'$'
 grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\n/g' | sed 's/ /\'$'\n/g' >Pedicularis_attollens_LM040.scaffold.list
 
 ```
+
+Then use the script `de_bruijn_graph_based_repeat_identification.py` to identify candidate repeat based on the number of connections in the de bruijn graph and presence in the final assembly. The output includes the kmer coverage and length for each candidate contig as well as the coverage for immediate neighbour contigs.
+ 
