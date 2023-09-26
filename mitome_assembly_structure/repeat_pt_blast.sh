@@ -1,0 +1,2 @@
+makeblastdb -in ../../../Organelle_assemblies/pt_assembly/$1.fasta -dbtype nucl -out pt
+blastn -task blastn-short -db pt -query $1.structure_repeat.fas -evalue 1e-80 -outfmt 6 | awk '{print $1,$4,$11}' | sort -u >$1.repeat_pt.blast

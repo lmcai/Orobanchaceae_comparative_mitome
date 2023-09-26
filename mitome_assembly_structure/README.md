@@ -65,5 +65,5 @@ grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\
 
 (4) Manually inspected the length, coverage of candidate repeats in the spreadsheet. Then extract the sequences in fasta format.
 
-(5) Blast the repeat sequences against plastid assemblies, then remove sequences overlap >95% with plastomes.
+(5) Blast the repeat sequences against plastid assemblies using `repeat_pt_blast.sh`, then remove sequences overlap >95% with plastomes.
 
