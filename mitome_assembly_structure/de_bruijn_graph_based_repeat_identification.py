@@ -76,3 +76,19 @@ for file in files:
 
 
 out.close()
+
+
+#manual inspection of candidate contigs and then extract sequence of these contigs
+x=open('repeat_candidate.tsv').readlines()
+sp_contigs={}
+for l in x[1:]:
+	try:sp_contigs[l.split()[0]].append(l.split()[1])
+	except KeyError:sp_contigs[l.split()[0]]=[l.split()[1]]
+
+for k in sp_contigs.keys():
+	out=open(k.split('.')[0]+'.structure_repeat.fas','a')
+	y=open('/Users/lcai/Dropbox/Parasitic_plant_mitonuclear_coevolution/Organelle_assemblies/mt_assembly/Raw_graph/'+k.split('.')[0]+'.gfa').readlines()
+	for l in y:
+		if l.startswith('S') and l.split()[1] in sp_contigs[k.split('.')[0]+'.gfa']:
+			d=out.write('>'+l.split()[1]+'\n'+l.split()[2]+'\n')
+	out.close()
