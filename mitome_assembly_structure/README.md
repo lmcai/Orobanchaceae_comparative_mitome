@@ -10,6 +10,12 @@ Use `mtpt_pt_bias.sh` to blast mtpt to Rehmannia plastome, then `cat` all bed fi
 ```
 bedtools coverage -d -a pt.bed -b all_mtpt.bed
 ```
+3. Examine retention pattens in holoparasites
+
+`cat` all holoparasite `*.comparative_mtpt.bed` into `holoparasite_mtpt.bed `. Then use similar method to count coverage:
+```
+bedtools coverage -d -a pt.bed -b holoparasite_mtpt.bed >holoparasite_pt_mtpt_coverage.bed
+```
 
 # II. Repeat
 1. Use `ROUSFinder2.0.py` to identify repeat with size >15 bp. The batch file to execute it across all species is `ROUSFinder_batch.sh`
