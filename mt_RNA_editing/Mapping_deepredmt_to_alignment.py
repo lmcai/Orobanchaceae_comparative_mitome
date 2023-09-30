@@ -17,7 +17,7 @@ for file in files:
 		if k in ed_sites.keys():
 			newseq=str(recs[k].seq)
 			for i in ed_sites[k]:
-				if recs[k].seq[int(i)-1]=='C':
+				if recs[k].seq[int(i)-1]=='C' or recs[k].seq[int(i)-1]=='c':
 					newseq=newseq[:int(i)-1]+'E'+newseq[int(i):]
 			d=out.write('>'+k+'\n'+newseq+'\n')
 		else:
