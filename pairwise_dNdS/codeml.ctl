@@ -1,9 +1,10 @@
-      seqfile = xxx.phy * sequence data filename
+      seqfile = sp43_allmt.phy * sequence data filename
+     treefile = sp43_allmt.tre 
       outfile = mlc           * main result file name
 
         noisy = 0  * 0,1,2,3,9: how much rubbish on the screen
       verbose = 0  * 0: concise; 1: detailed, 2: too much
-      runmode = -2  * 0: user tree;  1: semi-automatic;  2: automatic
+      runmode = 2  * 0: user tree;  1: semi-automatic;  2: automatic
                    * 3: StepwiseAddition; (4,5):PerturbationNNI; -2: pairwise
 
       seqtype = 1  * 1:codons; 2:AAs; 3:codons-->AAs
