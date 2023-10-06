@@ -1,3 +1,4 @@
+library(AnaCoDa)
 setwd("Dropbox/Parasitic_plant_mitonuclear_coevolution/Molecular_evolution/codon/")
 tsv_files <- list.files(pattern = "\\Gene.tsv$")
 
@@ -21,3 +22,7 @@ for (file in tsv_files) {
   print(plot)
   dev.off()
 }
+
+genome_file <- system.file("extdata", "more_genes.fasta", package = "AnaCoDa")
+> test=initializeGenomeObject('/Users/lcai/Dropbox/Parasitic_plant_mitonuclear_coevolution/Molecular_evolution/codon/Aeginetia_indica.codon.fas')
+> nc <- getNc(test)
