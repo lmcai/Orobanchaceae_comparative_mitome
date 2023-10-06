@@ -56,36 +56,4 @@ for i in codon:
 
 out.close()
 
-############################
-#MISC
-#GC content for each codon from alignment
-from Bio import SeqIO
-
-recs=SeqIO.index('sp43_allmt.fasta','fasta')
-
-sp=list(recs.keys())
-gc1={}
-gc2={}
-gc3={}
-for i in sp:
-	seq_str=str(recs[i].seq)
-	for j in range(0,len(seq_str)):
-		codon=j % 3
-		if codon==0:
-			if seq_str[j]=='C' or seq_str[j]=='G' or seq_str[j]=='c' or seq_str[j]=='G':
-				try:gc1[i]=gc1[i]+1
-				except KeyError:gc1[i]=1
-			elif codon==1:
-				if seq_str[j]=='C' or seq_str[j]=='G' or seq_str[j]=='c' or seq_str[j]=='G':
-					try:gc2[i]=gc2[i]+1
-					except KeyError:gc2[i]=1
-			elif codon==2:
-				if seq_str[j]=='C' or seq_str[j]=='G' or seq_str[j]=='c' or seq_str[j]=='G':
-					try:gc3[i]=gc3[i]+1
-					except KeyError:gc3[i]=1
-					
-out=open('GC123.tsv','a')
-out.write('sp\tGC1\tGC2\tGC3\n')
-for i in sp:
-	d=out.write(i+'\t'+str(gc1[i])+'\t'+str(gc2[i])+'\t'+str(gc3[i])+'\n')
 	
