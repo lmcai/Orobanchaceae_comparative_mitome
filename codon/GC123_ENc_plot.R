@@ -23,6 +23,10 @@ for (file in tsv_files) {
   dev.off()
 }
 
+s <- seq(0.25, 0.6, length.out = 100)
+> y <- 2 + s + 29 / (s^2 + (1 - s)^2)
+> plot(s, y, type = "l", xlab = "s", ylab = "y", main = "Curve y = 2 + x + 29 / (s^2 + (1 - s)^2)")
+
 genome_file <- system.file("extdata", "more_genes.fasta", package = "AnaCoDa")
 > test=initializeGenomeObject('/Users/lcai/Dropbox/Parasitic_plant_mitonuclear_coevolution/Molecular_evolution/codon/Aeginetia_indica.codon.fas')
 > nc <- getNc(test)
