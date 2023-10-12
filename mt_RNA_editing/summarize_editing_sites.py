@@ -1,5 +1,34 @@
 import os, re
 from Bio import SeqIO
+
+#summarize number of RNA editing sites per species
+x=open('deepredmt.all.pred').readlines()
+a={}
+for l in x:
+	sp=l.split()[1]
+	sp=sp.split('!')[0]
+	gene=l.split('.')[0]
+	try:
+		a[sp][gene]=a[sp][gene]+1
+	except KeyError:
+		try:a[sp][gene]=1
+		except KeyError:
+			a[sp]={}
+			a[sp][gene]=1
+
+genes=[l.split('.')[0] for l in x]
+genes=list(set(genes))
+out=open('deepredmt.sum_stat.tsv','a')
+out.write('\t'.join(['sp']+genes)+'\n')
+for k in a.keys():
+	editing_site_num=[]
+	for j in genes:
+		try:editing_site_num.append(a[k][j])
+		except KeyError:editing_site_num.append('NA')
+	editing_site_num=[str(i) for i in editing_site_num]
+	out.write(k+'\t'+'\t'.join(editing_site_num)+'\n')
+
+#summarize the codon position of RNA editing sites
 files=os.listdir('./')
 files=[i for i in files if i.endswith('marked.aln.fas') and not i.startswith('r')]
 
