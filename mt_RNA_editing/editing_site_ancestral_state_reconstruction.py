@@ -161,3 +161,31 @@ t.write(format=8)
 	
 
 #convert c->t mutations to 1 and everything else is 0 (including indels, other mutations)
+recs=AlignIO.read('conserved_editing4MPR.fasta','fasta')
+all_sp=open('conserved_editing4MPR.fasta').readlines()
+all_sp=[i[1:].strip() for i in all_sp if i.startswith('>')]
+gen_len=recs.get_alignment_length()
+
+Tmut={}
+for sp in all_sp:
+	Tmut[sp]=[]
+
+
+for i in range(0,gen_len):	
+	#editing site is not ancestral 
+	if not recs[:,i][-1]=='T':
+		positions = [j for j, letter in enumerate(recs[:,i]) if letter == 'T']
+		if positions:
+			for k in Tmut.keys():
+				if k in [all_sp[j] for j in positions]:Tmut[k].append(1)
+				else:Tmut[k].append(0)
+
+out=open('MPR.01matrix.tsv','a')
+for sp in all_sp:
+	d=out.write(sp+'\t'+'\t'.join([str(i) for i in Tmut[sp]])+'\n')
+
+out.close()
+
+###execute MPR.R to obtain MPR_lower.csv and MPR_upper.csv
+#To count changes based on ancestral state reconstruction
+
