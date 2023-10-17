@@ -64,7 +64,7 @@ curve_function <- function(s) {
 library(ggplot2)
 
 # Create a scatter plot
-pdf('ENc_by_species.pdf',width=12,height=6)
+pdf('ENc_by_species.pdf',width=8,height=6)
 ggplot(df, aes(x = GC3, y = Enc, color = Sp)) +
     geom_point() +
     labs(
