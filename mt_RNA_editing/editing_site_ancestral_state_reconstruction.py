@@ -188,4 +188,24 @@ out.close()
 
 ###execute MPR.R to obtain MPR_lower.csv and MPR_upper.csv
 #To count changes based on ancestral state reconstruction
+from ete3 import Tree
+t=Tree('MPR_output.tre',format=8)
+all_states=open('MPR_lower.csv').readlines()
+number_sites=len(all_states[0].split(','))
+Tmut={}
+for i in range(1,number_sites):
+	states={}
+	for l in all_states:states[l.split(',')[0]]=l.split(',')[i]
+	for node in t.traverse():
+		if not node.name=='Root' and not node.is_leaf():
+			if states[node.get_ancestors()[0].name]!=states[node.name] and states[node.name]=='1':
+				try:Tmut[node.name]=Tmut[node.name]+1
+				except KeyError:Tmut[node.name]=1
 
+for node in t.traverse():
+	if node.name in list(Tmut.keys()):
+		node.name=Tmut[node.name]
+
+t.write(format=8)
+
+'(((((((Aureolaria_grandiflora,((Castilleja_indivisa,Castilleja_paramensis)N39,Orthocarpus_attenuatus)4)6,(Pedicularis_attollens,Pedicularis_chinensis)8)N36,Brandisia_kwangsiensis)1,((Euphrasia_cuspidata,((Bartsia_inaequalis,Bellardia_latifolia)N30,Odontites_vulgaris)1)2,(Lathraea_squamaria,Lathraea_clandestina)N33)6)1,(((((((Aphyllon_purpureum,(Orobanche_fasciculata,Aphyllon_fasciculatum)2)1,(((Orobanche_ludoviciana,Orobanche_dugesii)N3,Orobanche_cooperi)N4,Orobanche_pinorum)2)3,Orobanche_ramosa)5,((Orobanche_minor,Orobanche_crenata)1,Orobanche_austrohispanica)15)2,(Mannagettae_hummelii,((Cistanche_salsa,Cistanche_deserticola)N11,Cistanche_tubulosa)4)4)N14,((Epifagus_virginiana,(Conopholis_americana,Conopholis_alpina)2)3,Kopsiopsis_strobilacea)N17)N18,((((Alectra_sessiliflora,(Escobedia_crassipes,Melasma_hispidum)N19)N20,Centranthera_chevalieri)N21,((Hyobanche_sanguinea,(Aeginetia_indica,Christisonia_kwangtungensis)10)N23,Harveya_capensis)2)6,Monochasma_japonicum)1)1)N28,Lindenbergia_grandiflora)1,Rehmannia_glutinosa);'
