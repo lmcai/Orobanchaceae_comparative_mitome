@@ -1,9 +1,10 @@
 library(igraph)
-pairwise_data <- read.table('repeat.aba.blast')
+pairwise_data <- read.table('repeat.aba.blast4plot')
 View(pairwise_data)
 pairwise_data=pairwise_data[,1:2]
 graph <- graph_from_data_frame(pairwise_data, directed = FALSE)
 communities <- cluster_louvain(graph)
+print(membership(communities))
 community_colors <- rainbow(max(membership(communities)) + 1)
 pdf('repeat_class.pdf',width = 8,height = 8)
 plot(
