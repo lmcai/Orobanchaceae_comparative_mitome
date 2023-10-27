@@ -1,4 +1,4 @@
-      seqfile = Rehmannia_glutinosa_vs_Rehmannia_glutinosa.phy * sequence data filename
+      seqfile = xxx.phy * sequence data filename
       outfile = mlc           * main result file name
 
         noisy = 0  * 0,1,2,3,9: how much rubbish on the screen
