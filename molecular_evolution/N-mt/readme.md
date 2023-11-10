@@ -12,5 +12,24 @@ Use reciprocal BLAST to identify orthologs with the script `reciprocol_best_hit.
 
 4. Reformat the reference seqs from Orobanchaceae and retrive these sequences in each genome sequencing reads
 ```
-python phyloherb.py -m assemb -r1 ../cleaned_reads/SRR7688105_1.fastq -r2 ../cleaned_reads/SRR7688105_2.fastq -ref ORO_ref.fas -prefix Cistanchetubulosa -n 8
+ python ../../PhyloHerb/phyloherb.py -m ortho -i N-mt/ -ref ORO_ref.fas -o test -evalue 1e-20 -nuc
+cat: test/AT1G08480.fas: No such file or directory
+cat: test/AT1G14450.fas: No such file or directory
+cat: test/AT1G24090.fas: No such file or directory
+cat: test/AT1G31010.fas: No such file or directory
+cat: test/AT1G47720.fas: No such file or directory
+cat: test/AT1G71260.fas: No such file or directory
+cat: test/AT1G76200.fas: No such file or directory
+cat: test/AT2G27730.fas: No such file or directory
+cat: test/AT2G46505.fas: No such file or directory
+cat: test/AT2G46540.fas: No such file or directory
+cat: test/AT3G13226.fas: No such file or directory
+cat: test/AT3G47833.fas: No such file or directory
+cat: test/AT4G20010.fas: No such file or directory
+cat: test/AT4G37830.fas: No such file or directory
+cat: test/AT5G13450.fas: No such file or directory
+cat: test/AT5G44785.fas: No such file or directory
+cat: test/AT5G47890.fas: No such file or directory
+cat: test/AT5G50340.fas: No such file or directory
+cat: test/AT5G51080.fas: No such file or directory
 ```
