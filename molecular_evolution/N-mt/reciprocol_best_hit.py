@@ -5,16 +5,16 @@ lib2={}
 ath=open('ATH_ref.fas').readlines()
 ath=[i[1:].split('.')[0] for i in ath if i.startswith('>')]
 
-b1=open('O_fasciculata.1.blast').readlines()
+b1=open('Aeginetia.1.blast').readlines()
 cur='NA'
 for l in b1:
 	if l.split()[0]!=cur:
-		lib1[l.split()[0]]=l.split()[1]
+		lib1[l.split('.')[0]]=l.split()[1]
 		cur=l.split()[0]
 
 
 
-b2=open('O_fasciculata.2.blast').readlines()
+b2=open('Aeginetia.2.blast').readlines()
 cur='NA'
 for l in b2:
 	if l.split()[0]!=cur:
@@ -26,7 +26,7 @@ for l in b2:
 
 
 
-recs=SeqIO.index('CDS/O_fasciculata.fas','fasta')
+recs=SeqIO.index('CDS/Aeginetia_trinity.Trinity.fasta','fasta')
 for i in ath:
 	try:
 		if lib2[lib1[i]]==i:
@@ -35,6 +35,8 @@ for i in ath:
 			out.close()
 		else:print('Not best:' +i)
 	except KeyError:print('NO hit: '+ i)
+
+
 
 recs=SeqIO.parse('ATH_ref.fas','fasta')
 for rec in recs:
