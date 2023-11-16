@@ -3,10 +3,13 @@ from Bio import SeqIO
 ath=open('ATH_ref.fas').readlines()
 ath=[i[1:].split('.')[0] for i in ath if i.startswith('>')]
 
+import os
+ath=os.listdir('.')
+ath=[i.split('.')[0] for i in ath if i.endswith('.aln.fas')]
 
 lib1={}
 lib2={}
-b1=open('Christisonia.1.blast').readlines()
+b1=open('Pedicularis.1.blast').readlines()
 cur='NA'
 for l in b1:
 	if l.split()[0]!=cur:
@@ -15,7 +18,7 @@ for l in b1:
 
 
 
-b2=open('Christisonia.2.blast').readlines()
+b2=open('Pedicularis.2.blast').readlines()
 cur='NA'
 for l in b2:
 	if l.split()[0]!=cur:
@@ -27,7 +30,7 @@ for l in b2:
 
 
 
-recs=SeqIO.index('CDS/Christisonia_trinity.Trinity.fasta','fasta')
+recs=SeqIO.index('CDS/Pedicularis_trinity.Trinity.fasta','fasta')
 for i in ath:
 	try:
 		if lib2[lib1[i]]==i:
