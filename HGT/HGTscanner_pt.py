@@ -4,7 +4,7 @@ import datetime
 from ete3 import Tree
 import ete3
 
-parser = argparse.ArgumentParser(description='HGTfinder is a utility wrappepr to identify HGT blocks in organellar (mostly mitochondrial) genomes.')
+parser = argparse.ArgumentParser(description='HGTscanner_mtpt is a utility wrappepr to identify and classify MTPT blocks in mitochondrial genomes.')
 parser.add_argument('-q', metavar='query', help='fasta file of the target mitome', required=True)
 parser.add_argument('-ref', metavar='reference', help='one fasta file containing all references including close relatives and potential HGT donor', required=True)
 parser.add_argument('-o', metavar='output', help='output prefix')
@@ -25,7 +25,7 @@ S='blastn -task dc-megablast -query '+reference+' -db '+sp+' -outfmt 6 -evalue 1
 os.system(S)
 print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
 ###########
-#sort blast results and five each row an uniq id
+#sort blast results and give each row an uniq id
 S="awk -v OFS='\\t' '{if ($9 <= $10) print $2, $9, $10, $1, $7, $8, $3, S11, $12; else print $2, $10, $9, $1, $7, $8, $3, S11, $12}' "+sp+".mtpt.blast| sort -k1,1 -k2,2n -k4,4n | awk 'BEGIN{FS=OFS='\\t'} {print $0, NR}' > "+sp+".mtpt.bed"
 #print(S)
 os.system(S)

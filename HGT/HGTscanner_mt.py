@@ -3,41 +3,102 @@ import os,argparse
 import datetime
 from ete3 import Tree
 import ete3
+import pybedtools
 
-parser = argparse.ArgumentParser(description='HGTfinder is a utility wrappepr to identify HGT blocks in organellar (mostly mitochondrial) genomes.')
+parser = argparse.ArgumentParser(description='HGTscanner_mt is a utility wrappepr to identify HGT blocks in organellar (mostly mitochondrial) genomes.')
 parser.add_argument('-q', metavar='query', help='fasta file of the target mitome', required=True)
-parser.add_argument('-ref', metavar='reference', help='one fasta file containing all references including close relatives and potential HGT donor', required=True)
-parser.add_argument('-o', metavar='output', help='output prefix')
+parser.add_argument('-ref', metavar='reference', help='one fasta file containing all custom references of both close relatives and potential HGT donor. This will be combined with the NCBI Viridiplantae mito database.')
+parser.add_argument('-o', metavar='output', help='output prefix', required=True)
+parser.add_argument('-family', metavar='family', help='family of the query for HGT classification', required=True)
 
 args = parser.parse_args()
 
 
 query=args.q
-reference=args.ref
+if args.ref:
+	reference=args.ref
 sp=args.o
-
+fam=args.family
 ###########
 #BLAST
+if args.ref:
+	#add custom references to database
+	print(str(datetime.datetime.now())+'\tAdded custom reference '+reference+' to the NCBI Viridiplantae mitochondrial database')
+	S='cat '+reference+' Viridiplantae_mt.fasta >mt_db.fas'
+	os.system(S)
+	S='makeblastdb -in '+query+' -out mt -dbtype nucl >/dev/null'
+	os.system(S)
+	S='blastn -task dc-megablast -query '+query+' -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.temp.blast'
+	os.system(S)
+	print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
+else:
+	#use built-in database
+	S='blastn -task dc-megablast -query '+query+' -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.temp.blast'
+	os.system(S)
+	print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
 
-S='makeblastdb -in '+query+' -out '+sp+' -dbtype nucl >/dev/null'
-os.system(S)
-S='blastn -task dc-megablast -query '+reference+' -db '+sp+' -outfmt 6 -evalue 1e-30 >'+sp+'.hgt.blast'
-os.system(S)
-print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
-###########
-#sort blast results and five each row an uniq id, remove self-to-self blast
-sp_id=open(query).readline()
-sp_id='Oro'+sp_id.split('_')[0][1:]
-S="awk '!/^"+sp_id+"/' "+sp+".hgt.blast | awk -v OFS='\\t' '{if ($9 <= $10) print $2, $9, $10, $1, $7, $8, $3, S11, $12; else print $2, $10, $9, $1, $7, $8, $3, S11, $12}' | sort -k1,1 -k2,2n -k4,4n | awk 'BEGIN{FS=OFS='\\t'} {print $0, NR}' > "+sp+".hgt.bed"
-#print(S)
-os.system(S)
+
+####################################
+#Add taxonomic information to each hit at species and family level
+x=open(sp+'.temp.blast').readlines()
+out=open(sp+'.taxon.blast','a')
+species={}
+family={}
+y=open('Viridiplantae_mt.taxonomy').readlines()
+for l in y:
+	species[l.split('\t')[0]]=l.split('\t')[1]
+	family[l.split('\t')[0]]=l.split('\t')[2].strip()
+
+
+for l in x:
+	try:
+		d=out.write(l.strip()+'\t'+species[l.split()[1]]+'\t'+family[l.split()[1]]+'\n')
+	except KeyError:
+		d=out.write(l.strip()+'\t\t\n')
+
+
+out.close()
 
 ###########
+#sort blast results, give each row a unique id
+S="cat "+sp+".taxon.blast | sort -k1,1 -k7,7n -k11,11n | awk -v OFS='\\t' '{if ($8-$7 <= 20000) print $1, $7, $8, $2, $9, $10, $13, $14, NR}' > "+sp+".taxon_sorted.bed"
+os.system(S)
+
+####################################
 #define potential HGT blocks
-S="bedtools merge -i "+sp+".hgt.bed -c 9 -o collapse >"+sp+'.temp.bed'
+S="bedtools merge -i "+sp+".taxon_sorted.bed -c 9 -o collapse >"+sp+'.temp.bed'
 os.system(S)
+#blocks <1500 bp in length can be used directly for downstream HGT inference; larger blocks >1500bp, break it into smaller ones because it can be caused by blasting to close relative or even itself
+x=open(sp+'.temp.bed').readlines()
+y=open(sp+'.taxon_sorted.bed').readlines()
+out=open(sp+'.hgt.bed','a')
 
-###########
+def id2bed(ids,bed_file):
+	id_dict={}
+	for l in bed_file:
+		id_dict[l.split()[-1]]=l
+	filtered_bed=[id_dict[j] for j in ids]
+	return(filtered_bed)
+
+#**the most important function in this pipeline 
+def break_large_beds(bed_file):
+	
+	a = BedTool(''.join(bed_file), from_string=True)
+
+for l in x:
+	if int(l.split()[2])-int(l.split()[1])<1500:
+		out.write(l)
+	else:
+		#examine if there are hits nested within longer hits to facilitate further breakup
+		ids=l.split('\t')[-1].strip()
+		raw_beds=id2bed(ids.split(','),y)
+		
+
+
+
+
+
+####################################
 #extract sequences for each block
 loci=open(sp+'.temp.bed').readlines()
 hits=open(sp+'.mtpt.bed').readlines()
