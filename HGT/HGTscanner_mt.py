@@ -4,12 +4,13 @@ import datetime
 from ete3 import Tree
 import ete3
 import pybedtools
-
+from numpy import median
 parser = argparse.ArgumentParser(description='HGTscanner_mt is a utility wrappepr to identify HGT blocks in organellar (mostly mitochondrial) genomes.')
 parser.add_argument('-q', metavar='query', help='fasta file of the target mitome', required=True)
 parser.add_argument('-ref', metavar='reference', help='one fasta file containing all custom references of both close relatives and potential HGT donor. This will be combined with the NCBI Viridiplantae mito database.')
 parser.add_argument('-o', metavar='output', help='output prefix', required=True)
-parser.add_argument('-family', metavar='family', help='family of the query for HGT classification', required=True)
+parser.add_argument('-f', metavar='family', help='family of the query for HGT classification', required=True)
+parser.add_argument('-b', metavar='mask', help='bed file for regions to be masked')
 
 args = parser.parse_args()
 
@@ -19,6 +20,12 @@ if args.ref:
 	reference=args.ref
 sp=args.o
 fam=args.family
+
+###############
+#MASK gene/MTPT regions
+if args.b:
+	print(str(datetime.datetime.now())+'\tMasking query sequence '+query+' using the bed file: '+args.b)
+
 ###########
 #BLAST
 if args.ref:
@@ -80,36 +87,76 @@ def id2bed(ids,bed_file):
 	filtered_bed=[id_dict[j] for j in ids]
 	return(filtered_bed)
 
-#**the most important function in this pipeline 
+#**the most important function in this pipeline**
 def break_large_beds(bed_file):
-	
-	a = BedTool(''.join(bed_file), from_string=True)
+	#remove blast hits from the same family to build new merged bed file (hopefully they are smaller). These hits will be added back don't worry
+	filtered=[]
+	same_fam=[]
+	for j in bed_file:
+		#replace empty columns with 'NA', pybedtools complain about them
+		if j.split('\t')[6]=='':
+			j='\t'.join(j.split('\t')[:6])+'\t'+j.split()[3]+'\t'+'\t'.join(j.split('\t')[7:])
+		if j.split('\t')[7]=='':
+			j='\t'.join(j.split('\t')[:7])+'\tNA\t'+'\t'.join(j.split('\t')[8:])
+		if not (j.split('\t')[7]==fam or j.split('\t')[3].startswith('Oro')):
+			filtered.append(j)
+		else:
+			same_fam.append(j)
+	filtered_bed = pybedtools.BedTool(''.join(filtered), from_string=True)
+	samefam_bed = pybedtools.BedTool(''.join(same_fam), from_string=True)
+	merged_bed = filtered_bed.merge(c=9,o='collapse')
+	#if merged_bed meet the criteria, you can define interactions with '+' and '-'!!
+	if ###:
+		(merged_bed+samefam_bed).count()
+	else:
+		#iteratively remove the longest until meet the criteria?
+
 
 for l in x:
-	if int(l.split()[2])-int(l.split()[1])<1500:
+	ids=l.split('\t')[-1].strip()
+	raw_beds=id2bed(ids.split(','),y)
+	median_len=median([int(j.split()[2])-int(j.split()[1]) for j in raw_beds])
+	bed_len=int(l.split()[2])-int(l.split()[1])
+	#get median blast hit length, if <500 bp or largely overlap with the bed size, output
+	if median_len>0.5*bed_len or bed_len<500:
 		out.write(l)
 	else:
-		#examine if there are hits nested within longer hits to facilitate further breakup
-		ids=l.split('\t')[-1].strip()
-		raw_beds=id2bed(ids.split(','),y)
+		new_beds=break_large_beds(raw_beds)
+		
+		
+		
 		
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+print(str(datetime.datetime.now())+'\tFound '+str()+' homologous genetic blocks for further exaination')
+
 ####################################
 #extract sequences for each block
 loci=open(sp+'.temp.bed').readlines()
 hits=open(sp+'.mtpt.bed').readlines()
 q_recs=SeqIO.index(query,'fasta')
-ref_recs=SeqIO.index(reference, 'fasta')
+if args.ref:
+	ref_recs=SeqIO.index('mt_db.fas', 'fasta')
+else:
+	ref_recs=SeqIO.index('Viridiplantae_mt.fasta', 'fasta')
 
 seq_loc={}
 for l in hits:
 	seq_loc[l.split()[-1]]=l
 
-order=1
 for l in loci:
 	out=open(sp+'.temp.'+str(order)+'.fas','w')
 	d=SeqIO.write(q_recs[l.split()[0]][(int(l.split()[1])-1):int(l.split()[2])],out,'fasta')
