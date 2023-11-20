@@ -5,6 +5,8 @@ from ete3 import Tree
 import ete3
 import pybedtools
 from numpy import median
+
+
 parser = argparse.ArgumentParser(description='HGTscanner_mt is a utility wrappepr to identify HGT blocks in organellar (mostly mitochondrial) genomes.')
 parser.add_argument('-q', metavar='query', help='fasta file of the target mitome', required=True)
 parser.add_argument('-ref', metavar='reference', help='one fasta file containing all custom references of both close relatives and potential HGT donor. This will be combined with the NCBI Viridiplantae mito database.')
@@ -12,9 +14,8 @@ parser.add_argument('-o', metavar='output', help='output prefix', required=True)
 parser.add_argument('-f', metavar='family', help='family of the query for HGT classification', required=True)
 parser.add_argument('-b', metavar='mask', help='bed file for regions to be masked')
 
+#pass argument values to variables
 args = parser.parse_args()
-
-
 query=args.q
 if args.ref:
 	reference=args.ref
@@ -124,11 +125,12 @@ def id2bed(ids,bed_file):
 	filtered_bed=[id_dict[j] for j in ids]
 	return(filtered_bed)
 
-def bedOK2go(bed_txt):
-	bed_text=bed_text.split('\n')
-	median_len=median([int(j.split()[2])-int(j.split()[1]) for j in bed_txt])
-	bed_start=min([int(j.split()[1]) for j in bed_text])
-	bed_end=max([int(j.split()[2]) for j in bed_text])
+def bedOK2go(bed_txt,all_aln):
+	ids=bed_txt.split('\t')[-1].strip()
+	aln=id2bed(ids.split(','),all_aln)
+	median_len=median([int(j.split()[2])-int(j.split()[1]) for j in aln])
+	bed_start=min([int(j.split()[1]) for j in aln])
+	bed_end=max([int(j.split()[2]) for j in aln])
 	bed_len=bed_end - bed_start
 	#get median blast hit length, if <500 bp or largely overlap with the bed size, output
 	if median_len>0.5*bed_len or bed_len<500:return(1)
@@ -136,7 +138,7 @@ def bedOK2go(bed_txt):
 
 #**one out of the two most important function in this pipeline**
 def break_large_beds(bed_file):
-	#remove blast hits from the same family to build new merged bed file (hopefully they are smaller). These hits will be added back don't worry
+	#I. remove blast hits from the same family to build new merged bed file (hopefully they are smaller). These hits will be added back don't worry
 	filtered=[]
 	addback=[]
 	for j in bed_file:
@@ -146,7 +148,12 @@ def break_large_beds(bed_file):
 			addback.append(j)
 	filtered_bed = pybedtools.BedTool(''.join(filtered), from_string=True).merge(c=9,o='collapse')
 	#if merged_bed meet the criteria, you can define interactions with '+' and '-'!!
-	if bedOK2go(str(filtered_bed)):
+	filtered_bed_str=str(filtered_bed)
+	OK=1
+	for l in filtered_bed_str.split('\n'):
+		if not bedOK2go(l,y):OK=0
+	if OK:
+		#removing same family aln is sufficitient
 		addback_bed = pybedtools.BedTool(''.join(addback), from_string=True)
 		addback_bed.intersect(merged_bed,u=True).merge()
 	else:
@@ -171,14 +178,18 @@ def break_large_beds(bed_file):
 					break
 
 for l in x:
-	ids=l.split('\t')[-1].strip()
-	raw_beds=id2bed(ids.split(','),y)
-	if bedOK2go(raw_beds):
-		out.write(l)
+	if bedOK2go(l,y):out.write(l)
 	else:
 		new_beds=break_large_beds(raw_beds)
 
 print(str(datetime.datetime.now())+'\tFound '+str()+' homologous genetic blocks for further exaination')
+
+
+
+
+
+
+
 
 ####################################
 #extract sequences for each block
