@@ -153,11 +153,16 @@ def break_large_beds(bed_file):
 	for l in filtered_bed_str.split('\n'):
 		if not bedOK2go(l,y):OK=0
 	if OK:
-		#removing same family aln is sufficitient
-		addback_bed = pybedtools.BedTool(''.join(addback), from_string=True)
-		addback_bed.intersect(merged_bed,u=True).merge()
+		#removing same family aln is sufficient to create acceptable homologs
+		addback_ids=[j.split()[-1] for j in addback]
+		#add back aln ids to each smaller bed region 
+		filtered_bed_str=filtered_bed_str.strip()
+		output_txt=''
+		for l in filtered_bed_str.split('\n'):
+			output_txt=output_txt+l+','+','.join(addback_ids)+'\n'
+		return(output_txt)
 	else:
-		#iteratively remove the longest until meet the criteria?
+		#II. iteratively remove the longest until meet the criteria?
 		filtered_bed_len={}
 		filtered_bed_len_list=[]
 		for j in filtered:
@@ -178,7 +183,8 @@ def break_large_beds(bed_file):
 					break
 
 for l in x:
-	if bedOK2go(l,y):out.write(l)
+	if bedOK2go(l,y):
+		out.write(l)
 	else:
 		new_beds=break_large_beds(raw_beds)
 
