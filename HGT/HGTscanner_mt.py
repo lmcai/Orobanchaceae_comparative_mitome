@@ -87,11 +87,21 @@ def id2bed(ids,bed_file):
 	filtered_bed=[id_dict[j] for j in ids]
 	return(filtered_bed)
 
-#**the most important function in this pipeline**
+def bedOK2go(bed_txt):
+	bed_text=bed_text.split('\n')
+	median_len=median([int(j.split()[2])-int(j.split()[1]) for j in bed_txt])
+	bed_start=min([int(j.split()[1]) for j in bed_text])
+	bed_end=max([int(j.split()[2]) for j in bed_text])
+	bed_len=bed_end - bed_start
+	#get median blast hit length, if <500 bp or largely overlap with the bed size, output
+	if median_len>0.5*bed_len or bed_len<500:return(1)
+	else:return(0)
+
+#**one out of the two most important function in this pipeline**
 def break_large_beds(bed_file):
 	#remove blast hits from the same family to build new merged bed file (hopefully they are smaller). These hits will be added back don't worry
 	filtered=[]
-	same_fam=[]
+	addback=[]
 	for j in bed_file:
 		#replace empty columns with 'NA', pybedtools complain about them
 		if j.split('\t')[6]=='':
@@ -101,45 +111,40 @@ def break_large_beds(bed_file):
 		if not (j.split('\t')[7]==fam or j.split('\t')[3].startswith('Oro')):
 			filtered.append(j)
 		else:
-			same_fam.append(j)
-	filtered_bed = pybedtools.BedTool(''.join(filtered), from_string=True)
-	samefam_bed = pybedtools.BedTool(''.join(same_fam), from_string=True)
-	merged_bed = filtered_bed.merge(c=9,o='collapse')
+			addback.append(j)
+	filtered_bed = pybedtools.BedTool(''.join(filtered), from_string=True).merge(c=9,o='collapse')
 	#if merged_bed meet the criteria, you can define interactions with '+' and '-'!!
-	if ###:
-		(merged_bed+samefam_bed).count()
+	if bedOK2go(str(filtered_bed)):
+		addback_bed = pybedtools.BedTool(''.join(addback), from_string=True)
+		addback_bed.intersect(merged_bed,u=True).merge()
 	else:
 		#iteratively remove the longest until meet the criteria?
-
+		filtered_bed_len={}
+		filtered_bed_len_list=[]
+		for j in filtered:
+			try:
+				filtered_bed_len[str(int(j.split()[2])-int(j.split()[1]))].append(j)
+			except KeyError:filtered_bed_len[str(int(j.split()[2])-int(j.split()[1]))]=[j]
+			filtered_bed_len_list.append(int(j.split()[2])-int(j.split()[1]))
+		while True:
+			cur_max=max(filtered_bed_len_list)
+			cur_max_bed=filtered_bed_len[cur_max]
+			for k in cur_max_bed:
+				filtered.remove(k)
+				addback.append(k)
+				filtered_bed_len_list.remove(cur_max)
+				filtered_bed = pybedtools.BedTool(''.join(filtered), from_string=True).merge()
+				if bedOK2go(str(filtered_bed)):
+					#save
+					break
 
 for l in x:
 	ids=l.split('\t')[-1].strip()
 	raw_beds=id2bed(ids.split(','),y)
-	median_len=median([int(j.split()[2])-int(j.split()[1]) for j in raw_beds])
-	bed_len=int(l.split()[2])-int(l.split()[1])
-	#get median blast hit length, if <500 bp or largely overlap with the bed size, output
-	if median_len>0.5*bed_len or bed_len<500:
+	if bedOK2go(raw_beds):
 		out.write(l)
 	else:
 		new_beds=break_large_beds(raw_beds)
-		
-		
-		
-		
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 print(str(datetime.datetime.now())+'\tFound '+str()+' homologous genetic blocks for further exaination')
 
