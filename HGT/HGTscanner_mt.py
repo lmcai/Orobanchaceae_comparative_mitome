@@ -20,11 +20,45 @@ if args.ref:
 	reference=args.ref
 sp=args.o
 fam=args.family
+if args.b:
+	mask_bed=args.b
+
 
 ###############
 #MASK gene/MTPT regions
+def mask_fasta_with_bed(fasta_file, bed_file, output_file):
+    # Read the BED file and store the regions to mask
+    regions_to_mask = []
+    with open(bed_file, 'r') as bed:
+        for line in bed:
+            fields = line.strip().split('\t')
+            chromosome, start, end = fields[:3]  # Assuming chromosome, start, and end columns in the BED file
+            regions_to_mask.append((chromosome, int(start), int(end)))
+    with open(fasta_file, 'r') as fasta, open(output_file, 'w') as output:
+        current_chromosome = None
+        masked_sequence = ''
+        for line in fasta:
+            if line.startswith('>'):  # FASTA header line
+                if current_chromosome:
+                    output.write(masked_sequence + '\n')
+                    masked_sequence = ''
+                output.write(line)  # Write the header line
+                current_chromosome = line.strip().split()[0][1:]  # Extract chromosome name
+            else:
+                sequence = line.strip()
+                for region in regions_to_mask:
+                    if region[0] == current_chromosome:
+                        masked_sequence += sequence[:region[1] - 1] + 'N' * (region[2] - region[1] + 1)
+                        sequence = sequence[region[2] - 1:]
+                masked_sequence += sequence + '\n'
+        if current_chromosome:
+            output.write(masked_sequence)
+
+
 if args.b:
 	print(str(datetime.datetime.now())+'\tMasking query sequence '+query+' using the bed file: '+args.b)
+	mask_fasta_with_bed(query, mask_bed, sp+'.mask.fas')
+
 
 ###########
 #BLAST
@@ -33,21 +67,24 @@ if args.ref:
 	print(str(datetime.datetime.now())+'\tAdded custom reference '+reference+' to the NCBI Viridiplantae mitochondrial database')
 	S='cat '+reference+' Viridiplantae_mt.fasta >mt_db.fas'
 	os.system(S)
-	S='makeblastdb -in '+query+' -out mt -dbtype nucl >/dev/null'
-	os.system(S)
-	S='blastn -task dc-megablast -query '+query+' -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.temp.blast'
-	os.system(S)
-	print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
 else:
-	#use built-in database
-	S='blastn -task dc-megablast -query '+query+' -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.temp.blast'
+	S='cp Viridiplantae_mt.fasta mt_db.fas'
 	os.system(S)
-	print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
+
+
+S='makeblastdb -in mt_db.fas -out mt -dbtype nucl >/dev/null'
+os.system(S)
+
+
+if args.b:S='blastn -task dc-megablast -query '+sp+'.mask.fas -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.raw.blast'
+else:S='blastn -task dc-megablast -query '+query+' -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.raw.blast'
+os.system(S)
+print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
 
 
 ####################################
 #Add taxonomic information to each hit at species and family level
-x=open(sp+'.temp.blast').readlines()
+x=open(sp+'.raw.blast').readlines()
 out=open(sp+'.taxon.blast','a')
 species={}
 family={}
@@ -61,24 +98,24 @@ for l in x:
 	try:
 		d=out.write(l.strip()+'\t'+species[l.split()[1]]+'\t'+family[l.split()[1]]+'\n')
 	except KeyError:
-		d=out.write(l.strip()+'\t\t\n')
+		if l.split()[1].startswith('Oro'):d=out.write(l.strip()+'\t'+l.split()[1]+'\tOrobanchaceae\n')
+		else:d=out.write(l.strip()+'\t'+l.split()[1]+'\tNA\n')
 
 
 out.close()
 
 ###########
-#sort blast results, give each row a unique id
+#sort blast results, give each row a unique id, only hits <20k are printed
 S="cat "+sp+".taxon.blast | sort -k1,1 -k7,7n -k11,11n | awk -v OFS='\\t' '{if ($8-$7 <= 20000) print $1, $7, $8, $2, $9, $10, $13, $14, NR}' > "+sp+".taxon_sorted.bed"
 os.system(S)
 
 ####################################
 #define potential HGT blocks
-S="bedtools merge -i "+sp+".taxon_sorted.bed -c 9 -o collapse >"+sp+'.temp.bed'
+S="bedtools merge -i "+sp+".taxon_sorted.bed -c 9 -o collapse >"+sp+'.merged.1.bed'
 os.system(S)
-#blocks <1500 bp in length can be used directly for downstream HGT inference; larger blocks >1500bp, break it into smaller ones because it can be caused by blasting to close relative or even itself
-x=open(sp+'.temp.bed').readlines()
+x=open(sp+'.merged.1.bed').readlines()
 y=open(sp+'.taxon_sorted.bed').readlines()
-out=open(sp+'.hgt.bed','a')
+out=open(sp+'.merged.2.bed','a')
 
 def id2bed(ids,bed_file):
 	id_dict={}
@@ -103,11 +140,6 @@ def break_large_beds(bed_file):
 	filtered=[]
 	addback=[]
 	for j in bed_file:
-		#replace empty columns with 'NA', pybedtools complain about them
-		if j.split('\t')[6]=='':
-			j='\t'.join(j.split('\t')[:6])+'\t'+j.split()[3]+'\t'+'\t'.join(j.split('\t')[7:])
-		if j.split('\t')[7]=='':
-			j='\t'.join(j.split('\t')[:7])+'\tNA\t'+'\t'.join(j.split('\t')[8:])
 		if not (j.split('\t')[7]==fam or j.split('\t')[3].startswith('Oro')):
 			filtered.append(j)
 		else:
