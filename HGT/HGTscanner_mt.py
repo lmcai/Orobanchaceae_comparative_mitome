@@ -186,6 +186,8 @@ for l in x:
 	if bedOK2go(l,y):
 		out.write(l)
 	else:
+		ids=l.split('\t')[-1].strip()
+		raw_beds=id2bed(ids.split(','),y)
 		new_beds=break_large_beds(raw_beds)
 
 print(str(datetime.datetime.now())+'\tFound '+str()+' homologous genetic blocks for further exaination')
