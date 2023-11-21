@@ -28,32 +28,22 @@ if args.b:
 ###############
 #MASK gene/MTPT regions
 def mask_fasta_with_bed(fasta_file, bed_file, output_file):
-    # Read the BED file and store the regions to mask
-    regions_to_mask = []
-    with open(bed_file, 'r') as bed:
-        for line in bed:
-            fields = line.strip().split('\t')
-            chromosome, start, end = fields[:3]  # Assuming chromosome, start, and end columns in the BED file
-            regions_to_mask.append((chromosome, int(start), int(end)))
-    with open(fasta_file, 'r') as fasta, open(output_file, 'w') as output:
-        current_chromosome = None
-        masked_sequence = ''
-        for line in fasta:
-            if line.startswith('>'):  # FASTA header line
-                if current_chromosome:
-                    output.write(masked_sequence + '\n')
-                    masked_sequence = ''
-                output.write(line)  # Write the header line
-                current_chromosome = line.strip().split()[0][1:]  # Extract chromosome name
-            else:
-                sequence = line.strip()
-                for region in regions_to_mask:
-                    if region[0] == current_chromosome:
-                        masked_sequence += sequence[:region[1] - 1] + 'N' * (region[2] - region[1] + 1)
-                        sequence = sequence[region[2] - 1:]
-                masked_sequence += sequence + '\n'
-        if current_chromosome:
-            output.write(masked_sequence)
+	sequences = SeqIO.index(fasta_file, "fasta")
+	bed = open(bed_file).readlines()
+	recs={}
+	for k in sequences.keys():
+		recs[k]=str(sequences[k].seq)
+	for l in bed:
+   		sequence_id = l.split()[0]
+   		start = int(l.split()[1])
+   		end = int(l.split()[2])
+   		sequence = recs[sequence_id]
+   		masked_sequence = sequence[:(start-1)] + "N" * (end - start + 1) + sequence[end:]
+   		recs[sequence_id] = masked_sequence
+	out=open(output_file,'a')
+	for k in recs.keys():
+		d=out.write('>'+k+'\n'+recs[k]+'\n')
+
 
 
 if args.b:
