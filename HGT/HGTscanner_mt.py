@@ -216,12 +216,15 @@ for hit in otherfam_merged:
 	out=open(sp+'.'+str(i)+'.fas','w')
 	for l in raw_beds:
 		d=out.write('>'+'|'.join(l.split()[3:8])+'\n')
-		d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[4])-1):int(l.split()[5])])+'\n')
-		
+		d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[4])-1):int(l.split()[5])])+'\n')		
 	#write query
 	d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],out,'fasta')
 	#add hits overlap with close relatives
-	
+	hit_bed=pybedtools.BedTool(str(hit),from_string=True)
+	samefam_hit=samefam_bed.intersect(hit_bed)
+	for l in samefam_hit:
+		d=out.write('>'+'|'.join(l.fields[3:8])+'\n')
+		d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[4])-1):int(l.split()[5])])+'\n')
 	i=i+1
 	out.close()
 
