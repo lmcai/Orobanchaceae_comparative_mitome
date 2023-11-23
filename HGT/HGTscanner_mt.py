@@ -130,52 +130,52 @@ def id2bed(ids,bed_file):
 	filtered_bed=[id_dict[j] for j in ids]
 	return(filtered_bed)
 
-def bedOK2go(bed_txt,all_aln):
-	ids=bed_txt.split('\t')[-1].strip()
-	aln=id2bed(ids.split(','),all_aln)
-	median_len=median([int(j.split()[2])-int(j.split()[1]) for j in aln])
-	bed_start=min([int(j.split()[1]) for j in aln])
-	bed_end=max([int(j.split()[2]) for j in aln])
-	bed_len=bed_end - bed_start
+#def bedOK2go(bed_txt,all_aln):
+#	ids=bed_txt.split('\t')[-1].strip()
+#	aln=id2bed(ids.split(','),all_aln)
+#	median_len=median([int(j.split()[2])-int(j.split()[1]) for j in aln])
+#	bed_start=min([int(j.split()[1]) for j in aln])
+#	bed_end=max([int(j.split()[2]) for j in aln])
+#	bed_len=bed_end - bed_start
 	#get median blast hit length, if <500 bp or largely overlap with the bed size, output
-	if median_len>0.5*bed_len or bed_len<500:return(1)
-	else:return(0)
+#	if median_len>0.5*bed_len or bed_len<500:return(1)
+#	else:return(0)
 
-def break_up_range(start, end, step):
-    ranges = []
-    for i in range(start, end + 1, step):
-        ranges.append((i, min(i + step - 1, end)))
-    return ranges
+#def break_up_range(start, end, step):
+#    ranges = []
+#    for i in range(start, end + 1, step):
+#        ranges.append((i, min(i + step - 1, end)))
+#    return ranges
 
 
 #This function is abandoned since I did not find a good way to cluster individual hits to groups with minor differences on their boundries
-def break_large_beds(bed_file):
+#def break_large_beds(bed_file):
 	#I. remove blast hits from the same family to build new merged bed file (hopefully they are smaller). These hits will be added back don't worry
-	filtered=[]
-	addback=[]
-	for j in bed_file:
-		if not (j.split('\t')[7]==fam or j.split('\t')[3].startswith('Oro')):
-			filtered.append(j)
-		else:
-			addback.append(j)
-	filtered_bed = pybedtools.BedTool(''.join(filtered), from_string=True).merge(c=9,o='collapse')
+#	filtered=[]
+#	addback=[]
+#	for j in bed_file:
+#		if not (j.split('\t')[7]==fam or j.split('\t')[3].startswith('Oro')):
+#			filtered.append(j)
+#		else:
+#			addback.append(j)
+#	filtered_bed = pybedtools.BedTool(''.join(filtered), from_string=True).merge(c=9,o='collapse')
 	#if merged_bed meet the criteria, you can define interactions with '+' and '-'!!
-	filtered_bed_str=str(filtered_bed).strip()
-	OK=1
-	for l in filtered_bed_str.split('\n'):
-		if not bedOK2go(l,y):OK=0
-	if OK:
+#	filtered_bed_str=str(filtered_bed).strip()
+#	OK=1
+#	for l in filtered_bed_str.split('\n'):
+#		if not bedOK2go(l,y):OK=0
+#	if OK:
 		#removing same family aln is sufficient to create acceptable homologs
-		addback_ids=[j.split()[-1] for j in addback]
+#		addback_ids=[j.split()[-1] for j in addback]
 		#add back aln ids to each smaller bed region 
-		filtered_bed_str=filtered_bed_str.strip()
-		output_txt=''
-		for l in filtered_bed_str.split('\n'):
-			output_txt=output_txt+l+','+','.join(addback_ids)+'\n'
-		return(output_txt)
-	else:
+#		filtered_bed_str=filtered_bed_str.strip()
+#		output_txt=''
+#		for l in filtered_bed_str.split('\n'):
+#			output_txt=output_txt+l+','+','.join(addback_ids)+'\n'
+#		return(output_txt)
+#	else:
 		#II. break up blocks based on coverage patterns
-		return('')
+#		return('')
 		#full_bed=str(pybedtools.BedTool(''.join(bed_file), from_string=True).merge())
 		#broken_range=break_up_range(int(full_bed.split()[1]),int(full_bed.split()[2]),5)
 		#broken_bed_txt=[full_bed.split()[0]+'\t'+str(i[0])+'\t'+str(i[1]) for i in broken_range]
@@ -208,15 +208,18 @@ def break_large_beds(bed_file):
 q_recs=SeqIO.index(query,'fasta')
 ref_recs=SeqIO.index('mt_db.fas', 'fasta')
 
-i=1
+order=1
 for hit in otherfam_merged:
 	#gather overlapping alignment from both other families and close relatives
 	ids=hit.fields[3]
-	raw_beds=id2bed(ids.split(','),y)
-	out=open(sp+'.'+str(i)+'.fas','w')
+	raw_beds=id2bed(ids.split(','),x)
+	out=open(sp+'.hgt.'+str(order)+'.fas','w')
 	for l in raw_beds:
-		d=out.write('>'+'|'.join(l.split()[3:8])+'\n')
-		d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[4])-1):int(l.split()[5])])+'\n')		
+		d=out.write('>'+'|'.join([l.split()[7]]+l.split()[3:7])+'\n')
+		if int(l.split()[4])<int(l.split()[5]):
+			d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[4])-1):int(l.split()[5])])+'\n')
+		else:
+			d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[5])-1):int(l.split()[4])])+'\n')	
 	#write query
 	d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],out,'fasta')
 	#add hits overlap with close relatives
@@ -224,21 +227,27 @@ for hit in otherfam_merged:
 	samefam_hit=samefam_bed.intersect(hit_bed)
 	for l in samefam_hit:
 		d=out.write('>'+'|'.join(l.fields[3:8])+'\n')
-		d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[4])-1):int(l.split()[5])])+'\n')
-	i=i+1
+		if int(l.fields[4])<int(l.fields[5]):
+			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[4])-1):int(l.fields[5])])+'\n')
+		else:
+			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[5])-1):int(l.fields[4])])+'\n')
+	current_time = datetime.datetime.now()
+	print(f"{current_time}\t Extracting sequences from alignment #{order}", end='\r')
+	order=order+1
 	out.close()
 
-print(str(datetime.datetime.now())+'\tExatracted potential HGT sequences for '+sp)
 
 #############
 #alignment and phylogenetic reconstruction
 print(str(datetime.datetime.now())+'\tStart alignment and phylogenetic reconstruction with mafft and iqtree for '+str(order-1)+' regions. May take a while...')
 
 for i in range(1,order):
-	S="mafft --quiet --adjustdirection "+sp+".temp."+str(i)+".fas | sed 's/_R_//g' > "+sp+".gt."+str(i)+".aln.fas"
+	current_time = datetime.datetime.now()
+	print(f"{current_time}\t Sequence alignment and IQTREE for alignment #{order}", end='\r')
+	S="mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
 	os.system(S)
-	b=SeqIO.index(sp+".gt."+str(i)+".aln.fas",'fasta')
-	q=loci[i-1].split()[0]
+	b=SeqIO.index(sp+".hgt."+str(i)+".aln.fas",'fasta')
+	#some trimming
 	if len(b[q].seq)<10000:
 		S="nohup iqtree -B 1000 -T 4 --quiet -m GTR+F -redo -s "+sp+".gt."+str(i)+".aln.fas >/dev/null 2>&1"
 		os.system(S)
