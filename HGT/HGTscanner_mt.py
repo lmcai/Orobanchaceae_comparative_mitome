@@ -208,6 +208,19 @@ def id2bed(ids,bed_file):
 q_recs=SeqIO.index(query,'fasta')
 ref_recs=SeqIO.index('mt_db.fas', 'fasta')
 
+def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
+	S='makeblastdb -in '+targets_file+' -out temp -dbtype nucl >/dev/null'
+	os.system(S)
+	S='blastn -task dc-megablast -query '+seed_file+' -db temp -outfmt 6 -evalue 1e-20 > temp.blast'
+	os.system(S)
+	hits=open('temp.blast').readlines()
+	for l in hits:
+		d=out2.write('>'+'|'.join(l.fields[3:8])+'\n')
+		if int(l.fields[4])<int(l.fields[5]):
+			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[4])-1):int(l.fields[5])])+'\n')
+		else:
+			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[5])-1):int(l.fields[4])])+'\n')
+
 order=1
 for hit in otherfam_merged:
 	#gather overlapping alignment from both other families and close relatives
@@ -225,12 +238,11 @@ for hit in otherfam_merged:
 	#add hits overlap with close relatives
 	hit_bed=pybedtools.BedTool(str(hit),from_string=True)
 	samefam_hit=samefam_bed.intersect(hit_bed)
+	d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],sp+'.tempseed.fas','fasta')
+	out2=open(sp+'.tempTarget.fas','w')
 	for l in samefam_hit:
-		d=out.write('>'+'|'.join(l.fields[3:8])+'\n')
-		if int(l.fields[4])<int(l.fields[5]):
-			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[4])-1):int(l.fields[5])])+'\n')
-		else:
-			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[5])-1):int(l.fields[4])])+'\n')
+		d=SeqIO.write(ref_recs[l.fields[3]],out2,'fasta')
+	seq2seq_ortho_extraction(sp+'.tempseed.fas',sp+'.tempTarget.fas',out)
 	current_time = datetime.datetime.now()
 	print(f"{current_time}\t Extracting sequences from alignment #{order}", end='\r')
 	order=order+1
