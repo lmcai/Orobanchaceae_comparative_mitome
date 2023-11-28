@@ -212,9 +212,9 @@ def id2bed(ids,bed_file):
 def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
 	S='makeblastdb -in '+targets_file+' -out temp -dbtype nucl >/dev/null'
 	os.system(S)
-	S='blastn -task dc-megablast -query '+seed_file+' -db temp -outfmt 6 -evalue 1e-20 | sort -k2,2 -k11,11n> temp.blast'
+	S='blastn -task dc-megablast -query '+seed_file+' -db temp -outfmt 6 -evalue 1e-20 | sort -k2,2 -k11,11n> '+sp+'.temp.blast'
 	os.system(S)
-	hits=open('temp.blast').readlines()
+	hits=open(sp+'.temp.blast').readlines()
 	#select only the best hit per target file
 	cur_hit=''
 	for l in hits:
