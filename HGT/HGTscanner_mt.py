@@ -215,11 +215,16 @@ def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
 	os.system(S)
 	hits=open('temp.blast').readlines()
 	for l in hits:
-		d=out2.write('>'+'|'.join(l.fields[3:8])+'\n')
-		if int(l.fields[4])<int(l.fields[5]):
-			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[4])-1):int(l.fields[5])])+'\n')
+		ncbiID=l.split()[1]
+		try:
+			d=out.write('>'+ncbiID+'|'+species[ncbiID]+'|'+family[ncbiID]+'\n')
+		except KeyError:
+			if ncbiID.startswith('Oro'):d=out.write('>'+ncbiID+'|Orobanchaceae\n')
+			else:d=out.write('>'+ncbiID+'|NA\n')
+		if int(l.split()[8])<int(l.split()[9]):
+			d=out.write(str(ref_recs[l.split()[1]].seq[(int(l.split()[8])-1):int(l.split()[9])])+'\n')
 		else:
-			d=out.write(str(ref_recs[l.fields[3]].seq[(int(l.fields[5])-1):int(l.fields[4])])+'\n')
+			d=out.write(str(ref_recs[l.split()[1]].seq[(int(l.split()[9])-1):int(l.split()[8])])+'\n')
 
 order=1
 for hit in otherfam_merged:
@@ -242,6 +247,7 @@ for hit in otherfam_merged:
 	out2=open(sp+'.tempTarget.fas','w')
 	for l in samefam_hit:
 		d=SeqIO.write(ref_recs[l.fields[3]],out2,'fasta')
+	out2.close()
 	seq2seq_ortho_extraction(sp+'.tempseed.fas',sp+'.tempTarget.fas',out)
 	current_time = datetime.datetime.now()
 	print(f"{current_time}\t Extracting sequences from alignment #{order}", end='\r')
