@@ -20,7 +20,7 @@ query=args.q
 if args.ref:
 	reference=args.ref
 sp=args.o
-fam=args.family
+fam=args.f
 if args.b:
 	mask_bed=args.b
 
@@ -56,19 +56,19 @@ if args.b:
 if args.ref:
 	#add custom references to database
 	print(str(datetime.datetime.now())+'\tAdded custom reference '+reference+' to the NCBI Viridiplantae mitochondrial database')
-	S='cat '+reference+' Viridiplantae_mt.fasta >mt_db.fas'
+	S='cat '+reference+' Viridiplantae_mt.fasta >'+sp+'.mt_db.fas'
 	os.system(S)
 else:
-	S='cp Viridiplantae_mt.fasta mt_db.fas'
+	S='cp Viridiplantae_mt.fasta '+sp+'.mt_db.fas'
 	os.system(S)
 
 
-S='makeblastdb -in mt_db.fas -out mt -dbtype nucl >/dev/null'
+S='makeblastdb -in '+sp+'.mt_db.fas -out '+sp+'.mt -dbtype nucl >/dev/null'
 os.system(S)
 
 
-if args.b:S='blastn -task dc-megablast -query '+sp+'.mask.fas -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.raw.blast'
-else:S='blastn -task dc-megablast -query '+query+' -db mt -outfmt 6 -evalue 1e-20 >'+sp+'.raw.blast'
+if args.b:S='blastn -task dc-megablast -query '+sp+'.mask.fas -db '+sp+'.mt -outfmt 6 -evalue 1e-20 >'+sp+'.raw.blast'
+else:S='blastn -task dc-megablast -query '+query+' -db '+sp+'.mt -outfmt 6 -evalue 1e-20 >'+sp+'.raw.blast'
 os.system(S)
 print(str(datetime.datetime.now())+'\tBLAST completed for '+sp)
 
@@ -199,7 +199,7 @@ print(str(datetime.datetime.now())+'\tFound '+str(len(otherfam_merged))+' homolo
 #extract sequences for each block
 
 q_recs=SeqIO.index(query,'fasta')
-ref_recs=SeqIO.index('mt_db.fas', 'fasta')
+ref_recs=SeqIO.index(sp+'.mt_db.fas', 'fasta')
 
 def id2bed(ids,bed_file):
 	id_dict={}
