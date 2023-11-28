@@ -123,13 +123,6 @@ d=out.write(str(otherfam_merged))
 print(str(datetime.datetime.now())+'\tFound '+str(len(otherfam_merged))+' homologous genetic blocks for further exaination')
 
 ###############everything below in this section is abandoned
-def id2bed(ids,bed_file):
-	id_dict={}
-	for l in bed_file:
-		id_dict[l.split()[-1]]=l
-	filtered_bed=[id_dict[j] for j in ids]
-	return(filtered_bed)
-
 #def bedOK2go(bed_txt,all_aln):
 #	ids=bed_txt.split('\t')[-1].strip()
 #	aln=id2bed(ids.split(','),all_aln)
@@ -208,23 +201,37 @@ def id2bed(ids,bed_file):
 q_recs=SeqIO.index(query,'fasta')
 ref_recs=SeqIO.index('mt_db.fas', 'fasta')
 
+def id2bed(ids,bed_file):
+	id_dict={}
+	for l in bed_file:
+		id_dict[l.split()[-1]]=l
+	filtered_bed=[id_dict[j] for j in ids]
+	return(filtered_bed)
+
+
 def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
 	S='makeblastdb -in '+targets_file+' -out temp -dbtype nucl >/dev/null'
 	os.system(S)
-	S='blastn -task dc-megablast -query '+seed_file+' -db temp -outfmt 6 -evalue 1e-20 > temp.blast'
+	S='blastn -task dc-megablast -query '+seed_file+' -db temp -outfmt 6 -evalue 1e-20 | sort -k2,2 -k11,11n> temp.blast'
 	os.system(S)
 	hits=open('temp.blast').readlines()
+	#select only the best hit per target file
+	cur_hit=''
 	for l in hits:
 		ncbiID=l.split()[1]
-		try:
-			d=out.write('>'+ncbiID+'|'+species[ncbiID]+'|'+family[ncbiID]+'\n')
-		except KeyError:
-			if ncbiID.startswith('Oro'):d=out.write('>'+ncbiID+'|Orobanchaceae\n')
-			else:d=out.write('>'+ncbiID+'|NA\n')
-		if int(l.split()[8])<int(l.split()[9]):
-			d=out.write(str(ref_recs[l.split()[1]].seq[(int(l.split()[8])-1):int(l.split()[9])])+'\n')
+		if ncbiID!=cur_hit:
+			try:
+				d=out.write('>'+family[ncbiID]+'|'+ncbiID+'|'+species[ncbiID]+'\n')
+			except KeyError:
+				if ncbiID.startswith('Oro'):d=out.write('>Orobanchaceae|'+ncbiID+'\n')
+				else:d=out.write('>NA|'+ncbiID+'\n')
+			if int(l.split()[8])<int(l.split()[9]):
+				d=out.write(str(ref_recs[l.split()[1]].seq[(int(l.split()[8])-1):int(l.split()[9])])+'\n')
+			else:
+				d=out.write(str(ref_recs[l.split()[1]].seq[(int(l.split()[9])-1):int(l.split()[8])])+'\n')
+			cur_hit=ncbiID
 		else:
-			d=out.write(str(ref_recs[l.split()[1]].seq[(int(l.split()[9])-1):int(l.split()[8])])+'\n')
+			pass
 
 order=1
 for hit in otherfam_merged:
@@ -261,15 +268,20 @@ print(str(datetime.datetime.now())+'\tStart alignment and phylogenetic reconstru
 
 for i in range(1,order):
 	current_time = datetime.datetime.now()
-	print(f"{current_time}\t Sequence alignment and IQTREE for alignment #{order}", end='\r')
-	S="mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
-	os.system(S)
-	b=SeqIO.index(sp+".hgt."+str(i)+".aln.fas",'fasta')
+	print(f"{current_time}\t Sequence alignment and IQTREE for alignment #{i}", end='\r')
+	recs=list(SeqIO.parse(sp+".hgt."+str(i)+".fas",'fasta'))
+	max_len=max([len(rec.seq) for rec in recs])
 	#some trimming
-	if len(b[q].seq)<10000:
-		S="nohup iqtree -B 1000 -T 4 --quiet -m GTR+F -redo -s "+sp+".gt."+str(i)+".aln.fas >/dev/null 2>&1"
+	if max_len<1500:
+		S="mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
 		os.system(S)
-		print(str(datetime.datetime.now())+'\tLoci #'+str(i))
+		S="nohup iqtree -B 1000 -T 4 --quiet -m GTR+F -redo -s "+sp+".hgt."+str(i)+".aln.fas >/dev/null 2>&1"
+		os.system(S)
+	elif max_len<5000:
+		S="mafft --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
+		os.system(S)
+		S="nohup iqtree -B 1000 -T 4 --quiet -m GTR+F -redo -s "+sp+".hgt."+str(i)+".aln.fas >/dev/null 2>&1"
+		os.system(S)
 	else:print(str(datetime.datetime.now())+'\tLoci #'+str(i)+' is longer than 10kb. Skip tree building. Check manually.')
 
 os.system('rm '+sp+'*.bionj')
@@ -283,48 +295,48 @@ os.system('rm '+sp+'*.nex')
 
 ##############
 #Evaluate the source of the region and output summary file
-out=open(sp+'.hgt.sum.tsv','w')
-out.write('ID\tTarget_scaffold\tStart\tEnd\tPhylo_source\tBlast_hit_ID\n')
-out.close()
-out=open(sp+'.hgt.sum.tsv','a')
+#out=open(sp+'.hgt.sum.tsv','w')
+#out.write('ID\tTarget_scaffold\tStart\tEnd\tPhylo_source\tBlast_hit_ID\n')
+#out.close()
+#out=open(sp+'.hgt.sum.tsv','a')
 
-for i in range(1,order):
-	q=loci[i-1].split()[0]
-	outgroup=[]
-	try:
-		t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
-		ancestor=t.get_midpoint_outgroup()
-		t.set_outgroup(ancestor)
-		q_branch=t&q
-		if not q_branch.get_ancestors()[0].is_root():
-			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-		else:
-			t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
-			outgroup=[leaf.name for leaf in t if leaf.name.startswith('Sorghum')]
-			if len(outgroup)>0:
-				t.set_outgroup(outgroup[0])
-				q_branch=t&q
-				sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-			else:
-				outgroup=[leaf.name for leaf in t if leaf.name.startswith('Rehm')]
-				if outgroup:
-					t.set_outgroup(t&outgroup[0])
-					q_branch=t&q
-					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-				else:
+#for i in range(1,order):
+#	q=loci[i-1].split()[0]
+#	outgroup=[]
+#	try:
+#		t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
+#		ancestor=t.get_midpoint_outgroup()
+#		t.set_outgroup(ancestor)
+#		q_branch=t&q
+#		if not q_branch.get_ancestors()[0].is_root():
+#			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#		else:
+#			t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
+#			outgroup=[leaf.name for leaf in t if leaf.name.startswith('Sorghum')]
+#			if len(outgroup)>0:
+#				t.set_outgroup(outgroup[0])
+#				q_branch=t&q
+#				sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#			else:
+#				outgroup=[leaf.name for leaf in t if leaf.name.startswith('Rehm')]
+#				if outgroup:
+#					t.set_outgroup(t&outgroup[0])
+#					q_branch=t&q
+#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#				else:
 					#no sorghum no rehmannia
-					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
-	except ete3.parser.newick.NewickError:
-		sisters=open(sp+'.temp.'+str(i)+".fas").readlines()
-		sisters=[i[1:].strip() for i in sisters if (i.startswith('>')) and (not i[1:].strip()==q)]
-		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+'ALL HITS: '+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
+#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
+#	except ete3.parser.newick.NewickError:
+#		sisters=open(sp+'.temp.'+str(i)+".fas").readlines()
+#		sisters=[i[1:].strip() for i in sisters if (i.startswith('>')) and (not i[1:].strip()==q)]
+#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+'ALL HITS: '+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
 		
-out.close()
-os.system('rm '+sp+'.temp.*.fas')
-os.system('rm '+sp+'.temp.bed')
-os.system('rm '+sp+'.n*')
+#out.close()
+os.system('rm '+sp+'.raw.blast')
+os.system('rm '+sp+'.tempseed.fas')
+os.system('rm '+sp+'.tempTarget.fas')
 
 if not os.path.isdir('HGTscanner_supporting_files'):os.mkdir('HGTscanner_supporting_files')
-os.system('mv '+sp+'.*.aln.fas* HGTscanner_supporting_files')
+os.system('mv '+sp+'.hgt.*.fas* HGTscanner_supporting_files')
 print(str(datetime.datetime.now())+'\tCompleted evaluation of HGT source. See summary file in '+sp+'.hgt.sum.tsv')
