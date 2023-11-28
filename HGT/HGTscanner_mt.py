@@ -338,5 +338,5 @@ os.system('rm '+sp+'.tempseed.fas')
 os.system('rm '+sp+'.tempTarget.fas')
 
 if not os.path.isdir('HGTscanner_supporting_files'):os.mkdir('HGTscanner_supporting_files')
-os.system('mv '+sp+'.hgt.*.fas* HGTscanner_supporting_files')
+os.system('mv '+sp+'.hgt.*.fas HGTscanner_supporting_files')
 print(str(datetime.datetime.now())+'\tCompleted evaluation of HGT source. See summary file in '+sp+'.hgt.sum.tsv')
