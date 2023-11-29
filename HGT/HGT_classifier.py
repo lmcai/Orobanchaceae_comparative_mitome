@@ -74,8 +74,13 @@ def HGT_calssifier(treefile,target_sp):
 					spp=leaf.name.split('|')[-1]
 					spp=spp[3:]
 					receiver.append(spp)
-			receiver=list(set([j.split('_')[0] for j in receiver]))
-			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+			receiver_genus=list(set([j.split('_')[0] for j in receiver]))
+			#get donor at family level
+			donor=[leaf.name for leaf in q_oro_branch.get_sisters()[0]]
+			donor_family=set([j.split('|') for j in donor])
+			if donor_family.issubset(close_relative):return('VGT')
+			else:
+				#sister contains distant families
 		else:
 			print(treefile,'bad rooting')
 	
