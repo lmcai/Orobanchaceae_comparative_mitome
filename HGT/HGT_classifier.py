@@ -85,42 +85,8 @@ def HGT_calssifier(treefile,target_sp):
 			print(treefile,'bad rooting')
 	
 
-Evaluate the source of the region and output summary file
+#Evaluate the source of the region and output summary file
 out=open(sp+'.hgt.sum.tsv','w')
 out.write('ID\tTarget_scaffold\tStart\tEnd\tPhylo_source\tBlast_hit_ID\n')
 out.close()
 out=open(sp+'.hgt.sum.tsv','a')
-
-#for i in range(1,order):
-#	q=loci[i-1].split()[0]
-#	outgroup=[]
-#	try:
-#		t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
-#		ancestor=t.get_midpoint_outgroup()
-#		t.set_outgroup(ancestor)
-#		q_branch=t&q
-#		if not q_branch.get_ancestors()[0].is_root():
-#			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#		else:
-#			t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
-#			outgroup=[leaf.name for leaf in t if leaf.name.startswith('Sorghum')]
-#			if len(outgroup)>0:
-#				t.set_outgroup(outgroup[0])
-#				q_branch=t&q
-#				sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#			else:
-#				outgroup=[leaf.name for leaf in t if leaf.name.startswith('Rehm')]
-#				if outgroup:
-#					t.set_outgroup(t&outgroup[0])
-#					q_branch=t&q
-#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#				else:
-					#no sorghum no rehmannia
-#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
-#	except ete3.parser.newick.NewickError:
-#		sisters=open(sp+'.temp.'+str(i)+".fas").readlines()
-#		sisters=[i[1:].strip() for i in sisters if (i.startswith('>')) and (not i[1:].strip()==q)]
-#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+'ALL HITS: '+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
-		
-#out.close()
