@@ -1,0 +1,78 @@
+from ete3 import Tree
+
+close_relative={'Orobanchaceae','Lamiaceae','Bignoniaceae','Phrymaceae','Acanthaceae','Oleaceae','Scrophulariaceae','Verbenaceae','Plantaginaceae','Gesneriaceae','Lentibulariaceae'}
+id2sp={'Ain':'',
+
+}
+
+
+def HGT_calssifier(treefile,target_sp):
+	t=Tree(treefile)
+	tips=[node.name for node in t]
+	all_families=[i.split('|')[0] for i in tips]
+	all_families.remove('NA')
+	all_families.remove(target_sp)
+	all_families=set(all_families)
+	if all_families.issubset(close_relative):return('VGT')
+	else:#use phylogeny to classify
+		ancestor=t.get_midpoint_outgroup()
+		t.set_outgroup(ancestor)
+		q_branch=t&target_sp
+		if not q_branch.get_ancestors()[0].is_root():
+			for leaf in t:
+				leaf.add_features(family=leaf.name.split('|')[0])
+			q_branch.add_features(family='Orobanchaceae')
+			#get Orobanchaceae receiver at genus level
+			q_oro_branch=''
+			receiver=[]
+			for nd in t.get_monophyletic(values=["Orobanchaceae"], target_attr="family"):
+				if target_sp in [leaf.name for leaf in nd]:
+					q_oro_branch=nd
+			for leaf in q_oro_branch:
+				try:receiver.append(id2sp[leaf.name.split('|')[-1]])
+				except KeyError:receiver.append(leaf.name.split('|')[-1])
+			receiver=list(set([j.split('_')[0] for j in receiver]))
+			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+		else:
+			print(treefile,'bad rooting')
+	
+
+Evaluate the source of the region and output summary file
+out=open(sp+'.hgt.sum.tsv','w')
+out.write('ID\tTarget_scaffold\tStart\tEnd\tPhylo_source\tBlast_hit_ID\n')
+out.close()
+out=open(sp+'.hgt.sum.tsv','a')
+
+#for i in range(1,order):
+#	q=loci[i-1].split()[0]
+#	outgroup=[]
+#	try:
+#		t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
+#		ancestor=t.get_midpoint_outgroup()
+#		t.set_outgroup(ancestor)
+#		q_branch=t&q
+#		if not q_branch.get_ancestors()[0].is_root():
+#			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#		else:
+#			t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
+#			outgroup=[leaf.name for leaf in t if leaf.name.startswith('Sorghum')]
+#			if len(outgroup)>0:
+#				t.set_outgroup(outgroup[0])
+#				q_branch=t&q
+#				sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#			else:
+#				outgroup=[leaf.name for leaf in t if leaf.name.startswith('Rehm')]
+#				if outgroup:
+#					t.set_outgroup(t&outgroup[0])
+#					q_branch=t&q
+#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#				else:
+					#no sorghum no rehmannia
+#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
+#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
+#	except ete3.parser.newick.NewickError:
+#		sisters=open(sp+'.temp.'+str(i)+".fas").readlines()
+#		sisters=[i[1:].strip() for i in sisters if (i.startswith('>')) and (not i[1:].strip()==q)]
+#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+'ALL HITS: '+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
+		
+#out.close()
