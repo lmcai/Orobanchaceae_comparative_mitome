@@ -1,8 +1,48 @@
 from ete3 import Tree
 
 close_relative={'Orobanchaceae','Lamiaceae','Bignoniaceae','Phrymaceae','Acanthaceae','Oleaceae','Scrophulariaceae','Verbenaceae','Plantaginaceae','Gesneriaceae','Lentibulariaceae'}
-id2sp={'Ain':'',
-
+id2sp={'Ain':"Aeginetia_indica",
+"Ase":"Alectra_sessiflora",
+"Afa":"Aphyllon_faciculatum",
+"Apu":"Aphyllon_purpureum",
+"Agr":"Aureolaria_grandiflora",
+"Bin":"Bartsia_inaequalis",
+"Bla":"Bellardia_latifolia",
+"Bkw":"Brandisia_kwangsiensis",
+"Cin":"Castilleja_indivisa",
+"Cpa":"Castilleja_paramensis",
+"Cch":"Centranthera_chevalieri",
+"Ckw":"Christisonia_kwangtungensis",
+"Cde":"Cistanche_deserticola",
+"Csa":"Cistanche_salsa",
+"Ctu":"Cistanche_tubulosa",
+"Cal":"Conopholis_alpina",
+"Cam":"Conopholis_americana",
+"Evi":"Epifagus_virginiana",
+"Ecr":"Escobedia_crassipes",
+"Ecu":"Euphrasia_cuspidata",
+"Hca":"Harveya_capensis",
+"Hsa":"Hyobanche_sanguinea",
+"Kst":"Kopsiopsis_strobilacea",
+"Lgr":"Lindenbergia_grandiflora",
+"Mhu":"Mannagettaea_hummelii",
+"Mhi":"Melasma_hispidum",
+"Mja":"Monochasma_japonicum",
+"Ose":"Odontites_serotina",
+"Oau":"Orobanche_austrohispanica",
+"Oco":"Orobanche_cooperi",
+"Ocr":"Orobanche_crenata",
+"Odu":"Orobanche_dugesii",
+"Ofa":"Orobanche_faciculata",
+"Ofo":"Orobanche_foetida",
+"Olu":"Orobanche_ludoviciana",
+"Omi":"Orobanche_minor",
+"Opi":"Orobanche_pinorum",
+"Ora":"Orobanche_ramosa",
+"Oat":"Orthocarpus_attenuatus",
+"Pat":"Pedicularis_attollens",
+"Pch":"Pedicularis_chinensis",
+"Rgl":"Rehmannia_glutinosa",
 }
 
 
@@ -30,7 +70,10 @@ def HGT_calssifier(treefile,target_sp):
 					q_oro_branch=nd
 			for leaf in q_oro_branch:
 				try:receiver.append(id2sp[leaf.name.split('|')[-1]])
-				except KeyError:receiver.append(leaf.name.split('|')[-1])
+				except KeyError:
+					spp=leaf.name.split('|')[-1]
+					spp=spp[3:]
+					receiver.append(spp)
 			receiver=list(set([j.split('_')[0] for j in receiver]))
 			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
 		else:
