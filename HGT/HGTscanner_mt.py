@@ -273,7 +273,7 @@ for i in range(1,order):
 	#max_len=max([len(rec.seq) for rec in recs])
 	#some trimming
 	S="timeout 20m mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
-	run_command_with_timeout(S, 600)
+	os.system(S)
 	#if max_len<1500:
 	#	S="mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
 	#	os.system(S)
