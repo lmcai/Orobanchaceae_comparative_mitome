@@ -266,35 +266,13 @@ for hit in otherfam_merged:
 #alignment and phylogenetic reconstruction
 print(str(datetime.datetime.now())+'\tStart alignment and phylogenetic reconstruction with mafft and iqtree for '+str(order-1)+' regions. May take a while...')
 
-import subprocess
-import shlex
-import signal
-import time
-
-def run_command_with_timeout(command, timeout):
-    try:
-        process = subprocess.Popen(shlex.split(command))
-        start_time = time.time()
-        while process.poll() is None:
-            time.sleep(0.1)
-            elapsed_time = time.time() - start_time
-            if elapsed_time > timeout:
-                os.kill(process.pid, signal.SIGKILL)
-
-if error:
-    print(error)
-else:
-    print("Output:", output)
-
-
-
 for i in range(1,order):
 	current_time = datetime.datetime.now()
 	print(f"{current_time}\t Sequence alignment and IQTREE for alignment #{i}", end='\r')
 	#recs=list(SeqIO.parse(sp+".hgt."+str(i)+".fas",'fasta'))
 	#max_len=max([len(rec.seq) for rec in recs])
 	#some trimming
-	S="mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
+	S="timeout 20m mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
 	run_command_with_timeout(S, 600)
 	#if max_len<1500:
 	#	S="mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
