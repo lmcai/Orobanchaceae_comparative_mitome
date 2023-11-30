@@ -1,6 +1,6 @@
 from ete3 import Tree
 
-close_relative={'Orobanchaceae','Lamiaceae','Bignoniaceae','Phrymaceae','Acanthaceae','Oleaceae','Scrophulariaceae','Verbenaceae','Plantaginaceae','Gesneriaceae','Lentibulariaceae'}
+close_relative={'Orobanchaceae','Lamiaceae','Bignoniaceae','Phrymaceae','Acanthaceae','Oleaceae','Scrophulariaceae','Verbenaceae','Plantaginaceae','Gesneriaceae','Lentibulariaceae','Apocynaceae'}
 id2sp={'Ain':"Aeginetia_indica",
 "Ase":"Alectra_sessiflora",
 "Afa":"Aphyllon_faciculatum",
