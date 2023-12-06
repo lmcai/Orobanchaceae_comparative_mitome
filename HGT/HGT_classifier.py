@@ -50,7 +50,8 @@ def HGT_calssifier(treefile,target_sp):
 	t=Tree(treefile)
 	tips=[node.name for node in t]
 	all_families=[i.split('|')[0] for i in tips]
-	all_families.remove('NA')
+	try:all_families.remove('NA')
+	except ValueError:pass
 	all_families.remove(target_sp)
 	all_families=set(all_families)
 	if all_families.issubset(close_relative):return('VGT')
@@ -62,25 +63,27 @@ def HGT_calssifier(treefile,target_sp):
 			for leaf in t:
 				leaf.add_features(family=leaf.name.split('|')[0])
 			q_branch.add_features(family='Orobanchaceae')
-			#get Orobanchaceae receiver at genus level
 			q_oro_branch=''
+			#get Orobanchaceae receiver at genus level
 			receiver=[]
 			for nd in t.get_monophyletic(values=["Orobanchaceae"], target_attr="family"):
 				if target_sp in [leaf.name for leaf in nd]:
 					q_oro_branch=nd
 			for leaf in q_oro_branch:
-				try:receiver.append(id2sp[leaf.name.split('|')[-1]])
-				except KeyError:
-					spp=leaf.name.split('|')[-1]
-					spp=spp[3:]
-					receiver.append(spp)
+				spp=leaf.name.split('|')[-1]
+				if spp.startswith('Oro'):spp=spp[3:]
+				try:receiver.append(id2sp[spp])
+				except KeyError:receiver.append(spp)
+			receiver.remove(target_sp)
+			receiver.append(id2sp[target_sp.split('_')[0]])
 			receiver_genus=list(set([j.split('_')[0] for j in receiver]))
-			#get donor at family level
 			donor=[leaf.name for leaf in q_oro_branch.get_sisters()[0]]
-			donor_family=set([j.split('|') for j in donor])
+			#get donor at family level
+			donor_family=set([j.split('|')[0] for j in donor])
 			if donor_family.issubset(close_relative):return('VGT')
 			else:
 				#sister contains distant families
+				print('A')
 		else:
 			print(treefile,'bad rooting')
 	
