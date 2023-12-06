@@ -83,7 +83,7 @@ def HGT_calssifier(treefile,target_sp):
 			if donor_family.issubset(close_relative):return('VGT')
 			else:
 				#sister contains distant families
-				print('A')
+				print(donor_family)
 		else:
 			print(treefile,'bad rooting')
 	
