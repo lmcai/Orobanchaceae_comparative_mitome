@@ -110,7 +110,7 @@ x=open(sp+".taxon_sorted.bed").readlines()
 otherfam=[]
 samefam=[]
 for l in x:
-	if not l.split()[7] in ['Orobanchaceae','Lamiaceae','Scrophulariaceae','Oleaceae']:
+	if not l.split()[7] in ['Orobanchaceae','Lamiaceae','Scrophulariaceae','Oleaceae','Acanthaceae']:
 		otherfam.append(l)
 	else:
 		samefam.append(l)
@@ -208,6 +208,40 @@ def id2bed(ids,bed_file):
 	filtered_bed=[id_dict[j] for j in ids]
 	return(filtered_bed)
 
+#takes in bed file of aligned region, order them, and filter for ones selected to output
+#Pch_1	133169	133918	BA000042.1	329847	330607	Nicotiana_tabacum
+#Pch_1	133907	134389	BA000042.1	330960	331502	Nicotiana_tabacum
+#Pch_1	134385	136416	BA000042.1	331627	333652	Nicotiana_tabacum
+#Pch_1	133169	133912	CP129458.1	165029	164277	Quercus_variabilis
+#Pch_1	133169	133299	CP129458.1	220967	221096	Quercus_variabilis
+#Pch_1	133907	135460	CP129458.1	163913	162355	Quercus_variabilis
+def aln_scaffolder(bedtxt):
+	rawtable = [line.split('\t') for line in raw_beds]
+	sortedtable = sorted(rawtable, key=lambda x: (x[3], int(x[1])))
+	filteredtable=[]
+	cursp=''
+	end_pos=0
+	for l in sortedtable:
+		if l[3]!=cursp:
+			#a new sp
+			filteredtable.append(l)
+			cursp=l[3]
+			end_pos=int(l[2])
+		else:#same sp
+			if int(l[1])>end_pos-50:
+				#allow for 50 bp overlap in the reference
+				filteredtable.append(l)
+				end_pos=int(l[2])
+	consolidatedtable={}
+	for l in filteredtable:
+		try:consolidatedtable[l[3]].append(l)
+		except KeyError:consolidatedtable[l[3]]=[l]
+	outputtable=[]
+	for k in consolidatedtable.keys():
+		refpos=[l[1]+'-'+l[2] for l in consolidatedtable[k]]
+		targetpos=[l[4]+'-'+l[5] for l in consolidatedtable[k]]
+		outputtable.append(consolidatedtable[k][0][0]+'\t'+';'.join(refpos)+'\t'+consolidatedtable[k][0][3]+'\t'+';'.join(targetpos)+'\t'+'\t'.join(consolidatedtable[k][0][6:]))
+	return(outputtable)
 
 def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
 	S='makeblastdb -in '+targets_file+' -out '+sp+'.temp -dbtype nucl >/dev/null'
@@ -238,13 +272,20 @@ for hit in otherfam_merged:
 	#gather overlapping alignment from both other families and close relatives
 	ids=hit.fields[3]
 	raw_beds=id2bed(ids.split(','),x)
+	seqout_beds=aln_scaffolder(raw_beds)
 	out=open(sp+'.hgt.'+str(order)+'.fas','w')
-	for l in raw_beds:
-		d=out.write('>'+'|'.join([l.split()[7]]+l.split()[3:7])+'\n')
-		if int(l.split()[4])<int(l.split()[5]):
-			d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[4])-1):int(l.split()[5])])+'\n')
-		else:
-			d=out.write(str(ref_recs[l.split()[3]].seq[(int(l.split()[5])-1):int(l.split()[4])])+'\n')	
+	for l in seqout_beds:
+		d=out.write('>'+'|'.join([l.split()[5]]+l.split()[2:5])+'\n')
+		secs=l.split()[3]
+		sequence=''
+		for sec in secs.split(';'):
+			start=int(sec.split('-')[0])
+			end=int(sec.split('-')[1])
+			if start<end:
+				sequence=sequence+str(ref_recs[l.split()[2]].seq[(start-1):end])	
+			else:
+				sequence=sequence+str(ref_recs[l.split()[2]].seq[(end-1):start].reverse_complement())
+			d=out.write(sequence+'\n')	
 	#write query
 	d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],out,'fasta')
 	#add hits overlap with close relatives
