@@ -298,7 +298,7 @@ for hit in otherfam_merged:
 	out2.close()
 	seq2seq_ortho_extraction(sp+'.tempseed.fas',sp+'.tempTarget.fas',out)
 	current_time = datetime.datetime.now()
-	print(f"{current_time}\t Extracting sequences from alignment #{order}", end='\r')
+	print(f"{current_time}\tExtracting sequences from alignment #{order}", end='\r')
 	order=order+1
 	out.close()
 
