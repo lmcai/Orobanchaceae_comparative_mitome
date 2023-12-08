@@ -110,7 +110,7 @@ x=open(sp+".taxon_sorted.bed").readlines()
 otherfam=[]
 samefam=[]
 for l in x:
-	if not l.split()[7] in ['Orobanchaceae','Lamiaceae','Scrophulariaceae','Oleaceae','Acanthaceae']:
+	if not l.split()[7] in ['Orobanchaceae','Lamiaceae','Scrophulariaceae','Oleaceae','Phrymaceae','Acanthaceae','Verbenaceae','Plantaginaceae','Gesneriaceae','Bignoniaceae','Anacardiaceae']:
 		otherfam.append(l)
 	else:
 		samefam.append(l)
