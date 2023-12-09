@@ -5,7 +5,7 @@ from ete3 import Tree
 import ete3
 import pybedtools
 from numpy import median
-
+from statistics import mode
 
 parser = argparse.ArgumentParser(description='HGTscanner_mt is a utility wrappepr to identify HGT blocks in organellar (mostly mitochondrial) genomes.')
 parser.add_argument('-q', metavar='query', help='fasta file of the target mitome', required=True)
@@ -216,7 +216,7 @@ def id2bed(ids,bed_file):
 #Pch_1	133169	133299	CP129458.1	220967	221096	Quercus_variabilis
 #Pch_1	133907	135460	CP129458.1	163913	162355	Quercus_variabilis
 def aln_scaffolder(bedtxt):
-	rawtable = [line.split('\t') for line in raw_beds]
+	rawtable = [line.split('\t') for line in bedtxt]
 	sortedtable = sorted(rawtable, key=lambda x: (x[3], int(x[1])))
 	filteredtable=[]
 	cursp=''
@@ -233,14 +233,26 @@ def aln_scaffolder(bedtxt):
 				filteredtable.append(l)
 				end_pos=int(l[2])
 	consolidatedtable={}
+	consolidated_block_count={}
 	for l in filteredtable:
-		try:consolidatedtable[l[3]].append(l)
-		except KeyError:consolidatedtable[l[3]]=[l]
-	outputtable=[]
-	for k in consolidatedtable.keys():
-		refpos=[l[1]+'-'+l[2] for l in consolidatedtable[k]]
-		targetpos=[l[4]+'-'+l[5] for l in consolidatedtable[k]]
-		outputtable.append(consolidatedtable[k][0][0]+'\t'+';'.join(refpos)+'\t'+consolidatedtable[k][0][3]+'\t'+';'.join(targetpos)+'\t'+'\t'.join(consolidatedtable[k][0][6:]))
+		try:
+			consolidatedtable[l[3]].append(l)
+			consolidated_block_count[l[3]]=consolidated_block_count[l[3]]+1
+		except KeyError:
+			consolidatedtable[l[3]]=[l]
+			consolidated_block_count[l[3]]=1
+	mode_consolidated_block_count=mode([consolidated_block_count[k] for k in consolidated_block_count.keys()])
+	if mode_consolidated_block_count<2:
+		outputtable=[]
+		for k in consolidatedtable.keys():
+			refpos=[l[1]+'-'+l[2] for l in consolidatedtable[k]]
+			targetpos=[l[4]+'-'+l[5] for l in consolidatedtable[k]]
+			outputtable.append(consolidatedtable[k][0][0]+'\t'+';'.join(refpos)+'\t'+consolidatedtable[k][0][3]+'\t'+';'.join(targetpos)+'\t'+'\t'.join(consolidatedtable[k][0][6:]))
+	else:
+		#break this scaffold into smaller chunks
+		for k in consolidated_block_count.keys():
+			outputtable=['X']
+			if consolidated_block_count[k]==mode_consolidated_block_count:outputtable.append(['\t'.join(i[:3]) for i in consolidatedtable[k]])
 	return(outputtable)
 
 def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
@@ -271,8 +283,19 @@ order=1
 for hit in otherfam_merged:
 	#gather overlapping alignment from both other families and close relatives
 	ids=hit.fields[3]
-	raw_beds=id2bed(ids.split(','),x)
-	seqout_beds=aln_scaffolder(raw_beds)
+	raw_beds_txt=id2bed(ids.split(','),x)
+	seqout_beds=aln_scaffolder(raw_beds_txt)
+	if seqout_beds[0]=='X':
+		#this hit needs to be further divided into smaller chunks
+		raw_beds=pybedtools.BedTool(''.join(raw_beds_txt), from_string=True)
+		for i in seqout_beds[1]:
+			subhit=pybedtools.BedTool(i, from_string=True)
+			new_raw_beds=raw_beds.intersect(subhit,wa=True,f=0.4)
+			#write other family
+			#write query 
+			#write close relative
+	else:
+	##here
 	out=open(sp+'.hgt.'+str(order)+'.fas','w')
 	for l in seqout_beds:
 		d=out.write('>'+'|'.join([l.split()[5]]+l.split()[2:5])+'\n')
