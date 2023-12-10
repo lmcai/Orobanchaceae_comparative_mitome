@@ -209,11 +209,12 @@ def id2bed(ids,bed_file):
 	return(filtered_bed)
 
 #takes in bed file of aligned region, order them, and filter for ones selected to output
+#e.g.
 #Pch_1	133169	133918	BA000042.1	329847	330607	Nicotiana_tabacum
 #Pch_1	133907	134389	BA000042.1	330960	331502	Nicotiana_tabacum
 #Pch_1	134385	136416	BA000042.1	331627	333652	Nicotiana_tabacum
 #Pch_1	133169	133912	CP129458.1	165029	164277	Quercus_variabilis
-#Pch_1	133169	133299	CP129458.1	220967	221096	Quercus_variabilis
+#Pch_1	133169	133299	CP129458.1	220967	221096	Quercus_variabilis #this row will be removed
 #Pch_1	133907	135460	CP129458.1	163913	162355	Quercus_variabilis
 def aln_scaffolder(bedtxt):
 	rawtable = [line.split('\t') for line in bedtxt]
@@ -252,7 +253,9 @@ def aln_scaffolder(bedtxt):
 		#break this scaffold into smaller chunks
 		for k in consolidated_block_count.keys():
 			outputtable=['X']
-			if consolidated_block_count[k]==mode_consolidated_block_count:outputtable.append(['\t'.join(i[:3]) for i in consolidatedtable[k]])
+			if consolidated_block_count[k]==mode_consolidated_block_count:
+				outputtable.append(['\t'.join(i[:3]) for i in consolidatedtable[k]])
+				break
 	return(outputtable)
 
 def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
@@ -280,6 +283,8 @@ def seq2seq_ortho_extraction(seed_file,targets_file,output_handle):
 			pass
 
 order=1
+num=1
+mapout=open(sp+'.alnmap.bed','w')
 for hit in otherfam_merged:
 	#gather overlapping alignment from both other families and close relatives
 	ids=hit.fields[3]
@@ -289,55 +294,83 @@ for hit in otherfam_merged:
 		#this hit needs to be further divided into smaller chunks
 		raw_beds=pybedtools.BedTool(''.join(raw_beds_txt), from_string=True)
 		for i in seqout_beds[1]:
+			out=open(sp+'.hgt.'+str(order)+'.fas','w')
 			subhit=pybedtools.BedTool(i, from_string=True)
 			new_raw_beds=raw_beds.intersect(subhit,wa=True,f=0.4)
 			#write other family
-			#write query 
+			min_start=1000000
+			max_end=0
+			for l in new_raw_beds:
+				l=str(l).split()
+				d=out.write('>'+l[7]+'|'+l[3]+'|'+l[4]+'-'+l[5]+'|'+l[6]+'\n')
+				start=int(l[4])
+				end=int(l[5])
+				if int(l[1])<min_start:min_start=int(l[1])
+				if int(l[2])>max_end:max_end=int(l[2])
+				if start<end:
+					d=out.write(str(ref_recs[l[3]].seq[(start-1):end])+'\n')
+				else:
+					d=out.write(str(ref_recs[l[3]].seq[(end-1):start].reverse_complement())+'\n')
+			#write query
+			d=SeqIO.write(q_recs[l[0]][(min_start-1):max_end],out,'fasta')
 			#write close relative
+			samefam_hit=samefam_bed.intersect(subhit,f=0.4)
+			if str(samefam_hit)!='':
+				d=SeqIO.write(q_recs[l[0]][(min_start-1):max_end],sp+'.tempseed.fas','fasta')
+				out2=open(sp+'.tempTarget.fas','w')
+				for ll in samefam_hit:
+					d=SeqIO.write(ref_recs[ll.fields[3]],out2,'fasta')
+				out2.close()
+				seq2seq_ortho_extraction(sp+'.tempseed.fas',sp+'.tempTarget.fas',out)
+			d=mapout.write(hit.chrom+'\t'+str(min_start)+'\t'+str(max_end)+'\t'+sp+'.hgt.'+str(order)+'.fas\n')
+			order=order+1
 	else:
-	##here
-	out=open(sp+'.hgt.'+str(order)+'.fas','w')
-	for l in seqout_beds:
-		d=out.write('>'+'|'.join([l.split()[5]]+l.split()[2:5])+'\n')
-		secs=l.split()[3]
-		sequence=''
-		for sec in secs.split(';'):
-			start=int(sec.split('-')[0])
-			end=int(sec.split('-')[1])
-			if start<end:
-				sequence=sequence+str(ref_recs[l.split()[2]].seq[(start-1):end])	
-			else:
-				sequence=sequence+str(ref_recs[l.split()[2]].seq[(end-1):start].reverse_complement())
-			d=out.write(sequence+'\n')	
-	#write query
-	d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],out,'fasta')
-	#add hits overlap with close relatives
-	hit_bed=pybedtools.BedTool(str(hit),from_string=True)
-	samefam_hit=samefam_bed.intersect(hit_bed)
-	d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],sp+'.tempseed.fas','fasta')
-	out2=open(sp+'.tempTarget.fas','w')
-	for l in samefam_hit:
-		d=SeqIO.write(ref_recs[l.fields[3]],out2,'fasta')
-	out2.close()
-	seq2seq_ortho_extraction(sp+'.tempseed.fas',sp+'.tempTarget.fas',out)
+		out=open(sp+'.hgt.'+str(order)+'.fas','w')
+		#write other family
+		for l in seqout_beds:
+			d=out.write('>'+'|'.join([l.split()[5]]+l.split()[2:5])+'\n')
+			secs=l.split()[3]
+			sequence=''
+			for sec in secs.split(';'):
+				start=int(sec.split('-')[0])
+				end=int(sec.split('-')[1])
+				if start<end:
+					sequence=sequence+str(ref_recs[l.split()[2]].seq[(start-1):end])	
+				else:
+					sequence=sequence+str(ref_recs[l.split()[2]].seq[(end-1):start].reverse_complement())
+				d=out.write(sequence+'\n')	
+		#write query
+		d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],out,'fasta')
+		#write close relatives
+		hit_bed=pybedtools.BedTool(str(hit),from_string=True)
+		samefam_hit=samefam_bed.intersect(hit_bed)
+		d=SeqIO.write(q_recs[hit.chrom][(hit.start-1):hit.end],sp+'.tempseed.fas','fasta')
+		out2=open(sp+'.tempTarget.fas','w')
+		for l in samefam_hit:
+			d=SeqIO.write(ref_recs[l.fields[3]],out2,'fasta')
+		out2.close()
+		seq2seq_ortho_extraction(sp+'.tempseed.fas',sp+'.tempTarget.fas',out)
+		d=mapout.write(hit.chrom+'\t'+str(hit.start)+'\t'+str(hit.end)+'\t'+sp+'.hgt.'+str(order)+'.fas\n')
+		order=order+1
+		out.close()
 	current_time = datetime.datetime.now()
-	print(f"{current_time}\tExtracting sequences from alignment #{order}", end='\r')
-	order=order+1
-	out.close()
-
+	print(f"{current_time}\tExtracting sequences from homologous genetic block #{num}", end='\r')
+	num=num+1
+		
+mapout.close()		
+print(f"{current_time}\tA total of #{order} aligned sequences from #{num} merged homologous genetic blocks were extracted.", end='\r')
 
 #############
 #alignment and phylogenetic reconstruction
 print(str(datetime.datetime.now())+'\tStart alignment and phylogenetic reconstruction with mafft and iqtree for '+str(order-1)+' regions. May take a while...')
 
-for i in range(1,order):
-	current_time = datetime.datetime.now()
-	print(f"{current_time}\t Sequence alignment and IQTREE for alignment #{i}", end='\r')
+#for i in range(1,order):
+#	current_time = datetime.datetime.now()
+#	print(f"{current_time}\t Sequence alignment and IQTREE for alignment #{i}", end='\r')
+#	S="timeout 20m mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
+#	os.system(S)
 	#recs=list(SeqIO.parse(sp+".hgt."+str(i)+".fas",'fasta'))
 	#max_len=max([len(rec.seq) for rec in recs])
-	#some trimming
-	S="timeout 20m mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
-	os.system(S)
 	#if max_len<1500:
 	#	S="mafft --genafpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
 	#	os.system(S)
@@ -350,59 +383,20 @@ for i in range(1,order):
 	#	os.system(S)
 	#else:print(str(datetime.datetime.now())+'\tLoci #'+str(i)+' is longer than 10kb. Skip tree building. Check manually.')
 
-os.system('rm '+sp+'*.bionj')
-os.system('rm '+sp+'*.gz')
-os.system('rm '+sp+'*.log')
-os.system('rm '+sp+'*.iqtree')
-os.system('rm '+sp+'*.mldist')
-os.system('rm '+sp+'*.phy')
-os.system('rm '+sp+'*.contree')
-os.system('rm '+sp+'*.nex')
+#os.system('rm '+sp+'*.bionj')
+#os.system('rm '+sp+'*.gz')
+#os.system('rm '+sp+'*.log')
+#os.system('rm '+sp+'*.iqtree')
+#os.system('rm '+sp+'*.mldist')
+#os.system('rm '+sp+'*.phy')
+#os.system('rm '+sp+'*.contree')
+#os.system('rm '+sp+'*.nex')
 
-##############
-#Evaluate the source of the region and output summary file
-#out=open(sp+'.hgt.sum.tsv','w')
-#out.write('ID\tTarget_scaffold\tStart\tEnd\tPhylo_source\tBlast_hit_ID\n')
-#out.close()
-#out=open(sp+'.hgt.sum.tsv','a')
-
-#for i in range(1,order):
-#	q=loci[i-1].split()[0]
-#	outgroup=[]
-#	try:
-#		t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
-#		ancestor=t.get_midpoint_outgroup()
-#		t.set_outgroup(ancestor)
-#		q_branch=t&q
-#		if not q_branch.get_ancestors()[0].is_root():
-#			sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#		else:
-#			t=Tree(sp+'.gt.'+str(i)+'.aln.fas.treefile')
-#			outgroup=[leaf.name for leaf in t if leaf.name.startswith('Sorghum')]
-#			if len(outgroup)>0:
-#				t.set_outgroup(outgroup[0])
-#				q_branch=t&q
-#				sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#			else:
-#				outgroup=[leaf.name for leaf in t if leaf.name.startswith('Rehm')]
-#				if outgroup:
-#					t.set_outgroup(t&outgroup[0])
-#					q_branch=t&q
-#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#				else:
-					#no sorghum no rehmannia
-#					sisters=[leaf.name for leaf in q_branch.get_sisters()[0]]
-#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
-#	except ete3.parser.newick.NewickError:
-#		sisters=open(sp+'.temp.'+str(i)+".fas").readlines()
-#		sisters=[i[1:].strip() for i in sisters if (i.startswith('>')) and (not i[1:].strip()==q)]
-#		out.write(str(i)+'\t'+loci[i-1].split()[0]+'\t'+loci[i-1].split()[1]+'\t'+loci[i-1].split()[2]+'\t'+'ALL HITS: '+','.join(sisters)+'\t'+loci[i-1].split()[3]+'\n')
-		
-#out.close()
 os.system('rm '+sp+'.raw.blast')
-os.system('rm '+sp+'.tempseed.fas')
-os.system('rm '+sp+'.tempTarget.fas')
+os.system('rm '+sp+'.temp*')
+os.system('rm '+sp+'.mt.n*')
+os.system('rm '+sp+'.mt_db.fas')
 
-if not os.path.isdir('HGTscanner_supporting_files'):os.mkdir('HGTscanner_supporting_files')
-os.system('mv '+sp+'.hgt.*.fas HGTscanner_supporting_files')
-print(str(datetime.datetime.now())+'\tCompleted evaluation of HGT source. See summary file in '+sp+'.hgt.sum.tsv')
+if not os.path.isdir(sp+'_HGTscanner_supporting_files'):os.mkdir(sp+'_HGTscanner_supporting_files')
+os.system('mv '+sp+'.hgt.*.fas '+sp+'_HGTscanner_supporting_files')
+print(str(datetime.datetime.now())+'\tCompleted evaluation of HGT source. See sequence file in '+sp+'_HGTscanner_supporting_files')
