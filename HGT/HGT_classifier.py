@@ -1,5 +1,5 @@
 from ete3 import Tree
-import sys
+import os
 
 close_relative={'Orobanchaceae','Lamiaceae','Bignoniaceae','Phrymaceae','Acanthaceae','Oleaceae','Scrophulariaceae','Verbenaceae','Plantaginaceae','Gesneriaceae','Lentibulariaceae'}
 id2sp={'Ain':"Aeginetia_indica",
@@ -88,7 +88,10 @@ def HGT_calssifier(treefile,target_sp):
 		else:
 			return('')
 	
-target=sys.argv[1]
+targets=os.listdir('./')
+targets=[i.split('.')[0] for i in targets if i.endswith('.alnmap.bed')]
+
+
 blocks=open(target+'.alnmap.bed').readlines()
 out=open(target+'.hgt.sum.tsv','w')
 d=out.write('ID\tStart\tEnd\tAlignment\tClassification\tReceiver\tDonor_Family\tDonor_genera\tMethod\tBS\n')
