@@ -91,66 +91,64 @@ def HGT_calssifier(treefile,target_sp):
 targets=os.listdir('./')
 targets=[i.split('.')[0] for i in targets if i.endswith('.alnmap.bed')]
 
-
-blocks=open(target+'.alnmap.bed').readlines()
-out=open(target+'.hgt.sum.tsv','w')
-d=out.write('ID\tStart\tEnd\tAlignment\tClassification\tReceiver\tDonor_Family\tDonor_genera\tMethod\tBS\n')
-
-i=1
-for l in blocks:
-	classification=''
-	donor_fam=''
-	donor_gen=''
-	receiver=''
-	method=''
-	bs=''
-	recs=open(target+'_HGTscanner_supporting_files/'+target+'.hgt.'+str(i)+'.fas').readlines()
-	allsp=[j[1:].strip() for j in recs if j.startswith('>')]
-	target_tip=[j for j in allsp if j.startswith(target)]
-	allsp.remove(target_tip[0])
-	oros=[j for j in allsp if j.startswith('Orobanchaceae')]
-	oro_sp=[]
-	genera=[j for j in allsp if not j.startswith('Orobanchaceae')]
-	for j in oros:
-		sp=j.split('|')[-1]
-		if sp.startswith('Oro') and not sp.startswith('Orobanche'):
-			sp=sp[3:]
-			sp=id2sp[sp]
-		oro_sp.append(sp)
-	oro_sp.append(id2sp[target])
-	oro_sp=list(set(oro_sp))
-	families=[j.split('|')[0] for j in allsp]
-	try:families.remove('NA')
-	except ValueError:pass
-	families=list(set(families))
-	#HGT case 1: only two families (orobanchaceae and donor) are in the tree
-	if len(families)<3:
-		classification='HGT'
-		receiver=';'.join(oro_sp)
-		try:families.remove('Orobanchaceae')
-		except ValueError:pass
-		donor_fam=';'.join(families)
-		genera=[j.split('|')[-1] for j in genera]
-		genera=list(set([j.split('_')[0] for j in genera]))
-		donor_gen=';'.join(genera)
-		method='BLAST'
-		bs='na'
-		d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
-	#HGT case 2: only one orobanchaceae is in the tree
-	elif len(oro_sp)==1:
-		classification='HGT'
-		receiver=oro_sp[0]
-		method='BLAST'
-		#check tree for donor
+for target in targets:
+	blocks=open(target+'.alnmap.bed').readlines()
+	out=open(target+'.hgt.sum.tsv','w')
+	d=out.write('ID\tStart\tEnd\tAlignment\tClassification\tReceiver\tDonor_Family\tDonor_genera\tMethod\tBS\n')
+	i=1
+	for l in blocks:
+		classification=''
 		donor_fam=''
 		donor_gen=''
+		receiver=''
+		method=''
 		bs=''
-		d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
-	else:
-		#need phylogeny for classification	
-		pass
-	i=i+1
-	#Evaluate the source of the region and output summary file
-
-out.close()
+		recs=open(target+'_HGTscanner_supporting_files/'+target+'.hgt.'+str(i)+'.fas').readlines()
+		allsp=[j[1:].strip() for j in recs if j.startswith('>')]
+		target_tip=[j for j in allsp if j.startswith(target)]
+		allsp.remove(target_tip[0])
+		oros=[j for j in allsp if j.startswith('Orobanchaceae')]
+		oro_sp=[]
+		genera=[j for j in allsp if not j.startswith('Orobanchaceae')]
+		for j in oros:
+			sp=j.split('|')[-1]
+			if sp.startswith('Oro') and not sp.startswith('Orobanche'):
+				sp=sp[3:]
+				sp=id2sp[sp]
+			oro_sp.append(sp)
+		oro_sp.append(id2sp[target])
+		oro_sp=list(set(oro_sp))
+		families=[j.split('|')[0] for j in allsp]
+		try:families.remove('NA')
+		except ValueError:pass
+		families=list(set(families))
+		#HGT case 1: only two families (orobanchaceae and donor) are in the tree
+		if len(families)<3:
+			classification='HGT'
+			receiver=';'.join(oro_sp)
+			try:families.remove('Orobanchaceae')
+			except ValueError:pass
+			donor_fam=';'.join(families)
+			genera=[j.split('|')[-1] for j in genera]
+			genera=list(set([j.split('_')[0] for j in genera]))
+			donor_gen=';'.join(genera)
+			method='BLAST'
+			bs='na'
+			d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
+		#HGT case 2: only one orobanchaceae is in the tree
+		elif len(oro_sp)==1:
+			classification='HGT'
+			receiver=oro_sp[0]
+			method='BLAST'
+			#check tree for donor
+			donor_fam=''
+			donor_gen=''
+			bs=''
+			d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
+		else:
+			#need phylogeny for classification	
+			pass
+		i=i+1
+	
+	out.close()
 
