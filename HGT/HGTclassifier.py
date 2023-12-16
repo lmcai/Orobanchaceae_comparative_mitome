@@ -47,7 +47,7 @@ id2sp={'Ain':"Aeginetia_indica",
 }
 
 
-def HGT_calssifier(treefile,target_sp):
+def HGTcalssifier(treefile,target_sp):
 	t=Tree(treefile)
 	tips=[node.name for node in t]
 	all_families=[i.split('|')[0] for i in tips]
