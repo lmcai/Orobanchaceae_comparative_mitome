@@ -55,7 +55,7 @@ def HGTcalssifier(treefile,target_sp):
 	except ValueError:pass
 	all_families.remove(target_sp)
 	all_families=set(all_families)
-	if all_families.issubset(close_relative):return('VGT')
+	if all_families.issubset(close_relative):return('VGT','NA','NA','NA','NA')
 	else:#use phylogeny to classify
 		ancestor=t.get_midpoint_outgroup()
 		t.set_outgroup(ancestor)
@@ -80,13 +80,15 @@ def HGTcalssifier(treefile,target_sp):
 			receiver=list(set(receiver))
 			donor=[leaf.name for leaf in q_oro_branch.get_sisters()[0]]
 			#get donor at family level
-			donor_family=set([j.split('|')[0] for j in donor])
-			if donor_family.issubset(close_relative):return('VGT')
+			donor_family=list(set([j.split('|')[0] for j in donor]))
+			donor_genera=[j.split('|')[-1] for j in donor]
+			donor_genera=list(set([j.split('_')[0] for j in donor_genera]))
+			if donor_family.issubset(close_relative):return('VGT','NA','NA','NA','NA')
 			else:
 				#sister contains distant families
-				return(receiver,donor_family,donor_genera)
+				return('HGT',';'.join(receiver),';'.join(donor_family),';'.join(donor_genera),bs)
 		else:
-			return('')
+			return('','','','','')
 	
 targets=os.listdir('./')
 targets=[i.split('.')[0] for i in targets if i.endswith('.alnmap.bed')]
@@ -133,21 +135,24 @@ for target in targets:
 			genera=list(set([j.split('_')[0] for j in genera]))
 			donor_gen=';'.join(genera)
 			method='BLAST'
-			bs='na'
+			bs='NA'
 			d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
-		#HGT case 2: only one orobanchaceae is in the tree
+		#HGT case 2: only one orobanchaceae is in the tree, but there are at least two other families
 		elif len(oro_sp)==1:
 			classification='HGT'
 			receiver=oro_sp[0]
 			method='BLAST'
 			#check tree for donor
+			try:
+			except :
 			donor_fam=''
 			donor_gen=''
 			bs=''
 			d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
 		else:
-			#need phylogeny for classification	
-			pass
+			#use phylogeny to assess classification	
+			try:
+			except :
 		i=i+1
 	
 	out.close()
