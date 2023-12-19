@@ -82,29 +82,47 @@ def GetSister(tree,target_sp):
 		return('NA','NA','NA','NA')
 
 
-# Function to find the largest continuous blocks with the target name value while allowing for at most a certain number of different names
-def find_largest_continuous_named_block(lst, target_name, max_diff):
+# Function to find the largest continuous blocks with the target name value while allowing for no more than a certain number of different names (e.g., have one Asteraceae nested within 10 Orobanchaceae. This accommodates for some phylogenetic estimation error)
+# Given named, ordered list
+named_ordered_list = [('Nissan', 'car'), ('BMW', 'car'), ('tesla', 'car'), ('1', 'number'), ('3', 'number'), ('dodge', 'car')]
+
+# Function to find the largest continuous block around a specific element based on its name
+def find_max_block_around_element(lst, target_name, element_index, max_diff_count):
     max_block = []
     current_block = []
     diff_count = 0
-    for item in lst:
+    max_start = 0
+    max_end = 0
+    current_start = 0
+    for index, item in enumerate(lst):
         name, value = item
-        if not current_block:
-            current_block.append(item)
-        elif value == target_name or (diff_count < max_diff and value != target_name):
-            current_block.append(item)
-            if value != target_name:
-                diff_count += 1
-        else:
-            if len(current_block) > len(max_block):
+        if index == element_index:  # When reaching the specified element index
+            start_index = max(0, index - 1)  # Start searching from one element before
+            end_index = min(len(lst) - 1, index + 1)  # End search at one element after
+            for i in range(start_index, end_index + 1):
+                current_block.append(lst[i])
+                if lst[i][1] != target_name:
+                    diff_count += 1
+                else:
+                	diff_count=0#I can have 1 Asteraceae and 1 Zingiberaceae as long as they are not next to each other 
+            if diff_count <= max_diff_count and len(current_block) > len(max_block):
                 max_block = current_block[:]
-            current_block = [item]
-            diff_count = 0
-    if len(current_block) > len(max_block):
-        max_block = current_block[:]
-    return(max_block)
+                max_start = start_index
+                max_end = end_index
+            break
+    return(max_block, max_start, max_end)
 
-largest_block = find_largest_continuous_block(named_ordered_list, target_name, max_different_names)
+# Finding the largest continuous block around a specific element based on its name
+target_name = 'car'  # Replace 'car' with any target name
+element_to_search = 'tesla'  # Element around which the max block is to be found
+max_different_names = 1  # Maximum number of different names allowed
+element_index = next(index for index, (name, _) in enumerate(named_ordered_list) if name == element_to_search)
+largest_block_around_element, start_index, end_index = find_max_block_around_element(named_ordered_list, target_name, element_index, max_different_names)
+
+# Displaying the largest continuous block around the specified element and its start and end indices
+print("Largest Block around", element_to_search, ":", largest_block_around_element)
+print("Start Index:", start_index)
+print("End Index:", end_index)
 
 
 def VGTFromTipOrder(tree,target_sp):
