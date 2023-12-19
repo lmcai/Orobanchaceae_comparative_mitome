@@ -47,6 +47,28 @@ id2sp={'Ain':"Aeginetia_indica",
 }
 
 
+def GetSister(tree,target_sp):
+	q_branch=tree&target_sp
+	if not q_branch.get_ancestors()[0].is_root():
+		for leaf in tree:
+			leaf.add_features(family=leaf.name.split('|')[0])
+		q_branch.add_features(family='Orobanchaceae')
+		q_oro_branch=''
+		#get Orobanchaceae receiver at species level
+		receiver=[]
+		for nd in tree.get_monophyletic(values=["Orobanchaceae"], target_attr="family"):
+			if target_sp in [leaf.name for leaf in nd]:
+				q_oro_branch=nd
+		donor=[leaf.name for leaf in q_oro_branch.get_sisters()[0]]
+		#get donor at family level
+		donor_family=list(set([j.split('|')[0] for j in donor]))
+		donor_genera=[j.split('|')[-1] for j in donor]
+		donor_genera=list(set([j.split('_')[0] for j in donor_genera]))
+		bs=q_oro_branch.get_sisters()[0].
+		return()
+	else:
+		return('bad rooting')
+
 def HGTcalssifier(treefile,target_sp):
 	t=Tree(treefile)
 	tips=[node.name for node in t]
@@ -126,11 +148,13 @@ for target in targets:
 		families=list(set(families))
 		#HGT case 1: only two families (orobanchaceae and donor) are in the tree
 		if len(families)<3:
-			classification='HGT'
+			classification='High confidence HGT'
 			receiver=';'.join(oro_sp)
 			try:families.remove('Orobanchaceae')
 			except ValueError:pass
-			donor_fam=';'.join(families)
+			if len(families)<2:
+				donor_fam='High confidence: '+';'.join(families)
+			else:donor_fam=';'.join(families)
 			genera=[j.split('|')[-1] for j in genera]
 			genera=list(set([j.split('_')[0] for j in genera]))
 			donor_gen=';'.join(genera)
@@ -139,7 +163,7 @@ for target in targets:
 			d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
 		#HGT case 2: only one orobanchaceae is in the tree, but there are at least two other families
 		elif len(oro_sp)==1:
-			classification='HGT'
+			classification='High confidence HGT'
 			receiver=oro_sp[0]
 			method='BLAST'
 			#check tree for donor
