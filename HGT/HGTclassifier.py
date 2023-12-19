@@ -81,9 +81,44 @@ def GetSister(tree,target_sp):
 	else:
 		return('NA','NA','NA','NA')
 
+
+# Function to find the largest continuous blocks with the target name value while allowing for at most a certain number of different names
+def find_largest_continuous_named_block(lst, target_name, max_diff):
+    max_block = []
+    current_block = []
+    diff_count = 0
+    for item in lst:
+        name, value = item
+        if not current_block:
+            current_block.append(item)
+        elif value == target_name or (diff_count < max_diff and value != target_name):
+            current_block.append(item)
+            if value != target_name:
+                diff_count += 1
+        else:
+            if len(current_block) > len(max_block):
+                max_block = current_block[:]
+            current_block = [item]
+            diff_count = 0
+    if len(current_block) > len(max_block):
+        max_block = current_block[:]
+    return(max_block)
+
+largest_block = find_largest_continuous_block(named_ordered_list, target_name, max_different_names)
+
+
 def VGTFromTipOrder(tree,target_sp):
 	tips=[node.name for node in t]
-	all_families=[i.split('|')[0] for i in tips]
+	families=[]
+	orders=[]
+	for j in tips:
+		if j==target_sp:
+			families.append('Orobanchaceae')
+			orders.append('Lamiales')
+		else:
+			families.append(j.split('|')[0])
+			if j.split('|')[0] in close_relative:orders.append('Lamiales')
+			else:orders.append('NOT')
 	
 
 def HGTcalssifier(tree,target_sp):
