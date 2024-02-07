@@ -61,7 +61,7 @@ def ID2sp(lst,target_sp):
 	return(list(set(outputsp)))
 
 
-# Function to find the largest continuous block around a specific element based on its name
+# Function to find the largest continuous block in a list around a specific element based on its name
 def find_max_block_around_element(lst, taxonomy_name, element_index, max_diff_count):
 	diff_count = 0
 	current_start = element_index
@@ -128,6 +128,9 @@ def VGTFromTipOrder(tree,target_sp):
 
 def GetSister(tree,target_sp):
 	q_branch=tree&target_sp
+	if q_branch.get_ancestors()[0].is_root():
+		ancestor=tree.get_midpoint_outgroup()
+		tree.set_outgroup(ancestor)
 	if not q_branch.get_ancestors()[0].is_root():
 		for leaf in tree:
 			leaf.add_features(family=leaf.name.split('|')[0])
@@ -146,6 +149,7 @@ def GetSister(tree,target_sp):
 				spp=spp[3:]
 				try:receiver.append(id2sp[spp])
 				except KeyError:receiver.append(spp)
+			else:receiver.append(spp)
 		receiver=list(set(receiver))			
 		for nd in tree.get_monophyletic(values=["Orobanchaceae"], target_attr="family"):
 			if target_sp in [leaf.name for leaf in nd]:
@@ -153,8 +157,15 @@ def GetSister(tree,target_sp):
 		donor=[leaf.name for leaf in q_oro_branch.get_sisters()[0]]
 		#get donor at family level
 		donor_family=list(set([j.split('|')[0] for j in donor]))
-		donor_genera=[j.split('|')[-1] for j in donor]
-		donor_genera=list(set([j.split('_')[0] for j in donor_genera]))
+		donor_genera_temp=[j.split('|')[-1] for j in donor]
+		donor_genera_temp=list(set([j.split('_')[0] for j in donor_genera_temp]))
+		donor_genera=[]
+		for k in donor_genera_temp:
+			if k.startswith('Oro') and not k.startswith('Orobanche'):
+				try:donor_genera.append(id2sp[k[3:]].split('_')[0])
+				except KeyError:donor_genera.append(k)
+			else:donor_genera.append(k)
+		donor_genera=list(set(donor_genera))
 		bs=tree.get_common_ancestor(donor+[target_sp]).support
 		return(receiver,donor_family,donor_genera,str(bs))
 	else:
@@ -202,18 +213,19 @@ def main(target):
 		oro_sp=ID2sp(oros,target_tip[0])
 		genera=[j for j in allsp if not j.startswith('Orobanchaceae')]
 		families=[j.split('|')[0] for j in allsp]
-		try:families.remove('NA')
-		except ValueError:pass
 		families=list(set(families))
 		try:families.remove('Orobanchaceae')
 		except ValueError:pass
+		if not families==['NA']:
+			try:families.remove('NA')
+			except ValueError:pass
 		#HGT case 1: only two families (orobanchaceae and donor) are in the tree
 		if len(families)<2:
 			if families[0] in close_relative:
 				#A VGT case since the only other family is a close relative
 				d=out.write(l.strip()+'\t'+'\t'.join(['VGT','NA','NA','NA','BLAST','NA'])+'\n')
 			else:
-				classification='High confidence: HGT'
+				classification='High confidence HGT'
 				receiver=';'.join(oro_sp)
 				donor_fam='High confidence: '+';'.join(families)
 				genera=[j.split('|')[-1] for j in genera]
@@ -224,7 +236,7 @@ def main(target):
 				d=out.write(l.strip()+'\t'+'\t'.join([classification,receiver,donor_fam,donor_gen,method,bs])+'\n')
 		#HGT case 2: only one orobanchaceae is in the tree, but there are at least two other families
 		elif len(oro_sp)==1:
-			classification='High confidence: HGT'
+			classification='High confidence HGT'
 			method='BLAST'
 			#check tree for donor
 			try:
@@ -258,14 +270,15 @@ def main(target):
 					receiver,donor_fam,donor_gen,bs=GetSister(t,target_tip[0])
 					if len(donor_fam)==1:
 						if not donor_fam[0] in close_relative and float(bs)>85:
-							classification='High confidence: HGT'
+							classification='High confidence HGT'
 							d=out.write(l.strip()+'\t'+'\t'.join([classification,';'.join(receiver),'High confidence: '+';'.join(donor_fam),';'.join(donor_gen),method,bs])+'\n')
 						else:
 							#one family that's not close relative, but with low support
-							classification='HGT'
+							classification='Putative HGT'
 							d=out.write(l.strip()+'\t'+'\t'.join([classification,';'.join(receiver),';'.join(donor_fam),';'.join(donor_gen),method,bs])+'\n')
 					else:
 						#multiple donor families
+						classification='Inconclusive'
 						d=out.write(l.strip()+'\t'+'\t'.join([classification,';'.join(receiver),';'.join(donor_fam),';'.join(donor_gen),method,bs])+'\n')
 			except ete3.parser.newick.NewickError:
 				receiver=target_tip[0]

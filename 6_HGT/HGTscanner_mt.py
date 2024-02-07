@@ -120,7 +120,7 @@ samefam_bed=pybedtools.BedTool(''.join(samefam), from_string=True)
 out=open(sp+'.merged.bed','w')
 d=out.write(str(otherfam_merged))
 
-print(str(datetime.datetime.now())+'\tFound '+str(len(otherfam_merged))+' homologous genetic blocks for further exaination')
+print(str(datetime.datetime.now())+'\tFound '+str(len(otherfam_merged))+' homologous genetic blocks for further examination')
 
 ###############everything below in this section is abandoned
 #def bedOK2go(bed_txt,all_aln):
