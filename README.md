@@ -9,11 +9,9 @@ The content of each subdirectory is listed as follows. For detailed description 
 
 - **1_plastid_assembly_structure**
   
-  kmer-based genome size estimation
+  plastid IR region annotation
   
-  de novo assembly with Supernova using 10X library
- 
-  scaffolding with the ARKS-LINKS pipeline using long-read data 
+  
 - **2_mitome_assembly_structure**
 
 
