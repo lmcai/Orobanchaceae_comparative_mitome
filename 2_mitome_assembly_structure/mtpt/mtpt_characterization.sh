@@ -1,5 +1,5 @@
 #blast identify plastid-like region
-makeblastdb -in Castilleja_paramensis.plastome.fasta -dbtype nucl -out pt
+makeblastdb -in all.plastome.fasta -dbtype nucl -out pt
 blastn -db pt -query Castilleja_paramensis_mitome.fasta -outfmt 6 -evalue 1e-70 >Castilleja_paramensis.mtpt.blast
 
 #Extract the following columns from blast output
