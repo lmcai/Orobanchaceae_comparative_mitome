@@ -11,7 +11,7 @@ The content of each subdirectory is listed as follows. For detailed description 
   
   plastid IR region annotation
   
-  
+  plastid reads removal for mitome assembly
 - **2_mitome_assembly_structure**
 
 
