@@ -144,15 +144,32 @@ def main(target,trfile):
 	target_tip=[j for j in allsp if j.startswith(target)]
 	target_sp=target_tip[0]
 	allfamilies=[]
+	orders=[]
 	for j in allsp:
 		if j==target_sp:
 			allfamilies.append((j,'Orobanchaceae'))
+			orders.append('Lamiales')
 		else:
 			allfamilies.append((j,j.split('|')[0]))
+			if j.split('|')[0] in close_relative:orders.append('Lamiales')
+			else:orders.append('NOT')
 	max_different_names = 2  # Maximum number of different names allowed
 	element_index = next(index for index, (name, _) in enumerate(allfamilies) if name == target_sp)
 	oro_start,oro_end,oro_tip,out_tip=find_max_block_around_element(allfamilies, 'Orobanchaceae', element_index, max_different_names)
-	d=out.write(trfile+'\t'+';'.join(out_tip)+'\n')
+	oro_genera=[j.split('_')[0] for j in ID2sp(oro_tip,target_sp)]
+	oro_genera=set(oro_genera)
+	#if this orobanchaceae cluster contains more than five genera, this is most likely a VGT
+	if len(oro_genera)>4:
+		d=out.write(trfile+'\t'+';'.join(out_tip)+'\n')
+	#check if this cluster is nested within a larger Lamiales cluster
+	else:
+		if oro_start!=0:
+			if orders[oro_start-1]=='Lamiales':
+				d=out.write(trfile+'\t'+';'.join(out_tip)+'\n')
+		if oro_end!=(len(allsp)-1):
+			if orders[oro_end+1]=='Lamiales':
+				d=out.write(trfile+'\t'+';'.join(out_tip)+'\n')
+	
 
 trees=os.listdir(sys.argv[1]+'_HGTscanner_supporting_files/')
 trees=[j for j in trees if j.endswith('treefile')]
