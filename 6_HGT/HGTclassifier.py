@@ -273,9 +273,13 @@ def main(target):
 							classification='High confidence HGT'
 							d=out.write(l.strip()+'\t'+'\t'.join([classification,';'.join(receiver),'High confidence: '+';'.join(donor_fam),';'.join(donor_gen),method,bs])+'\n')
 						else:
-							#one family that's not close relative, but with low support
-							classification='Putative HGT'
-							d=out.write(l.strip()+'\t'+'\t'.join([classification,';'.join(receiver),';'.join(donor_fam),';'.join(donor_gen),method,bs])+'\n')
+							if donor_fam[0] in close_relative:
+								#this family is within lamiales
+								d=out.write(l.strip()+'\t'+'\t'.join(['VGT','NA','NA','NA','Phylogeny','NA'])+'\n')
+							else:
+								#one family that's not close relative, but with low support
+								classification='Putative HGT'
+								d=out.write(l.strip()+'\t'+'\t'.join([classification,';'.join(receiver),';'.join(donor_fam),';'.join(donor_gen),method,bs])+'\n')
 					else:
 						#multiple donor families
 						classification='Inconclusive'
