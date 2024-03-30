@@ -1,0 +1,42 @@
+treefile = mt37g_42sp.tre
+numsites = 58386
+outfile = round3.mt37g_42sp.tre
+smooth = 1000
+thorough
+#prime
+
+mrca = node1 Rehmannia_glutinosa Lindenbergia_grandiflora
+mrca = node2 Lindenbergia_grandiflora Alectra_sessiliflora
+mrca = node3 Kopsiopsis_strobilacea Aphyllon_purpureum
+mrca = node4 Odontites_vulgaris Euphrasia_cuspidata
+mrca = node5 Odontites_vulgaris Castilleja_indivisa
+mrca = node6 Harveya_capensis Alectra_sessiliflora
+
+min = node1 30.23
+max = node1 30.23
+min = node2 29.178
+max = node2 29.178
+min = node3 16.48
+max = node3 16.48
+min = node4 7.86
+max = node4 7.86
+min = node5 25.214
+max = node5 25.214
+min = node6 10.5878
+max = node6 10.5878
+
+
+#cv
+#randomcv
+#cvstart = 1000
+#cvstop = 0.01
+#cvoutfile = mt37g_42sp.treePL.cv.txt
+nthreads = 1
+
+opt = 4
+moredetail
+optad = 2
+moredetailad
+optcvad = 1
+moredetailcvad
+
