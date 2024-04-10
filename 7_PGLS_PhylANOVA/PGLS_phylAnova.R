@@ -1,20 +1,53 @@
 #boxplot of consolidated hgt+mtpt content
-x=read.csv('HGT_genomesize_hemiholo.csv')
+x=read.csv('genomesize_hemiholo_HGT.csv')
 pdf('FigS_hgt_mtpt_content.pdf',width=2,height=4)
 boxplot(hgt_mtpt_content ~ Class_code, data=x)
 points(jitter(as.numeric(factor(x$Class_code))), x$hgt_mtpt_content, col = "blue", pch = 16)
 dev.off()
 
 #####################################################################
-#PGLS hgt ~ genome size
+
 library(ape)
 library(nlme)
 library(geiger)
-data <- read.csv("HGT_genomesize_hemiholo.csv",row.names = 1)
+data <- read.csv("genomesize_hemiholo_HGT.csv",row.names = 1)
 data$Class_code=as.factor(data$Class_code)
 phy_tree=read.tree('round3.mt37g_42sp.treePL.tre')
+phy_tree$node.label<-NULL
 name.check(data,phy_tree)
 
+################
+#PGLS pt_genome_size ~ gc%
+library(caper)
+comp.data<-comparative.data(phy_tree, data, names.col="Species_dup", vcv.dim=2)
+model_pt<-pgls(pt_size~pt_gc, data=comp.data)
+
+Call:
+pgls(formula = pt_size ~ pt_gc, data = comp.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.08103 -0.16315  0.01618  0.11618  1.69020 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 3.3987e+01 2.3364e+00 14.5471  < 2e-16 ***
+pt_gc       2.5111e-05 1.4239e-05  1.7635  0.08565 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.5249 on 39 degrees of freedom
+Multiple R-squared: 0.07385,	Adjusted R-squared: 0.0501 
+F-statistic:  3.11 on 1 and 39 DF,  p-value: 0.08565 
+
+################
+#PGLS hgt ~ genome size
 #check hgt ~ genome size without phylogeny
 #see a potential bug solution from https://stackoverflow.com/questions/63138372/error-running-pgls-in-ape-no-covariate-specified
 
@@ -77,13 +110,14 @@ Residual standard error: 20180 on 39 degrees of freedom
 Multiple R-squared: 0.4199,	Adjusted R-squared: 0.405 
 F-statistic: 28.23 on 1 and 39 DF,  p-value: 4.643e-06 
 
-
-
+#######################################################################
+#PhyloANOVA of mt_size in hemi vs holo
+library(phytools)
+phylANOVA(phy_tree, data$Class_code, data$mt_size, nsim=1000, posthoc=TRUE, p.adj="holm")
 
 
 #######################################################################
 #PhyloANOVA of hgt_mtpt in hemi vs holo
-library(phytools)
 
 data$Class_code=as.factor(data$Class_code)
 phylANOVA(phy_tree, data$Class_code, data$mtpt_perc, nsim=1000, posthoc=TRUE, p.adj="holm")
