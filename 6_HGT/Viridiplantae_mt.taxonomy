@@ -745,7 +745,7 @@ DQ983602.1	Cedrus_deodara	Pinaceae
 DQ983608.1	Cedrus_deodara	Pinaceae
 FJ824835.1	Cedrus_deodara	Pinaceae
 GU599163.1	Cedrus_deodara	Pinaceae
-MH703722.1	Cedrus_deodara_RPS19_(	Pinaceae
+MH703722.1	Cedrus_deodara	Pinaceae
 MW354105.1	Cedrus_deodara	Pinaceae
 MW354106.1	Cedrus_deodara	Pinaceae
 MW354107.1	Cedrus_deodara	Pinaceae
@@ -765,14 +765,14 @@ MW354120.1	Cedrus_deodara	Pinaceae
 MW354121.1	Cedrus_deodara	Pinaceae
 MW354122.1	Cedrus_deodara	Pinaceae
 MW354123.1	Cedrus_deodara	Pinaceae
-MW354124.1	Cedrus_deodara_5S	Pinaceae
+MW354124.1	Cedrus_deodara	Pinaceae
 MW354125.1	Cedrus_deodara	Pinaceae
 MW354126.1	Cedrus_deodara	Pinaceae
 MW354127.1	Cedrus_deodara	Pinaceae
 MW354128.1	Cedrus_deodara	Pinaceae
 MW354129.1	Cedrus_deodara	Pinaceae
 MW354130.1	Cedrus_deodara	Pinaceae
-LC606497.1	Cedrus_deodara_89-969	Pinaceae
+LC606497.1	Cedrus_deodara	Pinaceae
 MW132438.1	Keteleeria_davidiana	Pinaceae
 MW165316.1	Keteleeria_davidiana	Pinaceae
 AY159845.1	Larix_laricina	Pinaceae
@@ -813,7 +813,7 @@ JQ411214.1	Larix_occidentalis	Pinaceae
 JQ411215.1	Larix_occidentalis	Pinaceae
 X76278.1	P.abies	Pinaceae
 AJ000256.1	Picea_abies	Pinaceae
-AJ000356.1	Picea_abies_coxI	Pinaceae
+AJ000356.1	Picea_abies	Pinaceae
 AJ225562.1	Picea_abies	Pinaceae
 AF142641.1	Picea_abies	Pinaceae
 AF142642.1	Picea_abies	Pinaceae
