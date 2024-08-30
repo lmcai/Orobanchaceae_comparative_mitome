@@ -3,6 +3,8 @@ Scripts used in the comparative genome study of mitochondrial genome evolution i
 
 Citation:
 
+Reach out to Liming Cai (daybreak.chua@gmail.com) for any questions
+
 Description of the subdirectories
 ----------------------
 The content of each subdirectory is listed as follows. For detailed descriptions and scripts, please see the README file within each directory.
