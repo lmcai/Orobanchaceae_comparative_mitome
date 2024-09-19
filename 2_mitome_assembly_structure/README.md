@@ -1,4 +1,22 @@
-# I. MTPT
+# Mitochondrial genome assembly
+
+1. Reads were mapped to the plastid assembly using end-to-end alignment in Bowtie:
+```
+bowtie2-build reference_plastid_genome.fas reference_chl
+bowtie2 --end-to-end --fast -x reference_chl -1 forward.R1.fq -2 reverse.R2.fq -S my_species.sam > my_species.bowtie.log 2>&1
+```
+Reads with 100% sequence similarity and >98% sequence overlap with the plastid assemblies were filtered prior to the assembly using `filter_pt_reads.py`
+2. Mitochondrial genomes were assembled using GetOrganelle using the following commands:
+```
+get_organelle_from_reads.py -1 forward.fq -2 reverse.fq -o mitochondria_output -R 20 -k 65,85,105 -P 1000000 -F embplant_mt
+```
+3. The resulting De Bruijn assembly graphs was visualized in Bandage and manually curated to generate the final assembly.
+
+# Mitochondrial gene annotation
+
+Annotations of mitochondrial genomes were conducted on the web-based GeSeq under default settings. The resulting GenBank formatted annotation was inspected and curated in Geneious Prime 2019.1.3 (Biomatters Ltd, Auckland, New Zealand, http://www.geneious.com/)
+
+# MTPT annotation
 1. Calculate mtpt proportion for each species: `mtpt_characterization.sh`
 
 This script outputs the number of site in the mito assembly with pt origin (similarity based)
