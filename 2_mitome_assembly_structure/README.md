@@ -14,6 +14,8 @@ get_organelle_from_reads.py -1 forward.fq -2 reverse.fq -o mitochondria_output -
 
 # Mitochondrial gene annotation
 
+Annotations of mitochondrial genomes were conducted on the web-based GeSeq under default settings. The resulting GenBank formatted annotation was inspected and curated in Geneious Prime 2019.1.3 (Biomatters Ltd, Auckland, New Zealand, http://www.geneious.com/)
+
 # MTPT annotation
 1. Calculate mtpt proportion for each species: `mtpt_characterization.sh`
 
