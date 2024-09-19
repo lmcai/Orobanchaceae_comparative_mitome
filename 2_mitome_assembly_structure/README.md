@@ -98,4 +98,13 @@ grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\
 (6) Do an all-by-all blast for all repeat sequences and use `repeat_class_claster_plot.R` to identify repeat clusters.
 
 # III. Synteny
-./nucmer  -p <prefix>  ref.fa  qry.fa
+
+Pairwise genome alignment was conducted with Mummer v4.0 and visualized with dotPlotly
+```
+nucmer -p AH --maxmatch -g 1000 -b 1000 Rehmannia_glutinosa.fas Aeginetia_indica.fas 
+show-coords -c AH.delta > AH.coords
+./dotPlotly/mummerCoordsDotPlotly.R -i AH.coords -o AH -t -m 50 -q 500 -l -p 5
+```
+The complete script to run mummer on cluster is available in `Synteny_analysis.sh`.
+
+To summarize the total length of sequences in synteny with the reference Rehmannia_glutinosa, use `mummer_sum.sh` to process *.coords files.
