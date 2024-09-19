@@ -96,3 +96,6 @@ grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\
 (5) Blast the repeat sequences against plastid assemblies using `repeat_pt_blast.sh`, then remove sequences overlap >95% with plastomes.
 
 (6) Do an all-by-all blast for all repeat sequences and use `repeat_class_claster_plot.R` to identify repeat clusters.
+
+# III. Synteny
+./nucmer  -p <prefix>  ref.fa  qry.fa
