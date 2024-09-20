@@ -57,7 +57,7 @@ NC_034308.1	101143	101220	trnI-CAU
 ```
 The majority of these universal MTPT is from non-coding regions in plastomes.
 
-# II. Repeat
+# Repeat
 1. Use `ROUSFinder2.0.py` to identify repeat with size >15 bp. The batch file to execute it across all species is `ROUSFinder_batch.sh`
 
 ROUSFinder will incorrectly identify long single-copy sequences as repeats somehow. Use `summarize_ROUSfinder_result.sh` to remove these and calculate the total size of repeats.
@@ -115,7 +115,7 @@ grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\
 
 (6) Do an all-by-all blast for all repeat sequences and use `repeat_class_claster_plot.R` to identify repeat clusters.
 
-# III. Synteny
+# Synteny
 
 Pairwise genome alignment was conducted with Mummer v4.0 and visualized with dotPlotly
 ```
