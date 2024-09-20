@@ -70,7 +70,7 @@ grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\
 
 <img src="./example_repeat.png" width="450" height="270">
 
-The highlighted contigs in red satisfy the criteria defined in (1).
+This is a de bruijn assembly graph. The highlighted contigs in red satisfy the criteria defined in (1).
 
 (4) Manually inspected the length, coverage of candidate repeats in the spreadsheet. Then extract the sequences in fasta format.
 
