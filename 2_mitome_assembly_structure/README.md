@@ -16,7 +16,7 @@ get_organelle_from_reads.py -1 forward.fq -2 reverse.fq -o mitochondria_output -
 
 Annotations of mitochondrial genomes were conducted on the web-based GeSeq under default settings. The resulting GenBank formatted annotation was inspected and curated in Geneious Prime 2019.1.3 (Biomatters Ltd, Auckland, New Zealand, http://www.geneious.com/)
 
-# Repeat
+# Repeat annotation
 1. Use `ROUSFinder2.0.py` to identify repeat with size >15 bp. The batch file to execute it across all species is `ROUSFinder_batch.sh`
 
 ROUSFinder will incorrectly identify long single-copy sequences as repeats somehow. Use `summarize_ROUSfinder_result.sh` to remove these and calculate the total size of repeats.
@@ -69,6 +69,8 @@ grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\
 (3) Then use the script `de_bruijn_graph_based_repeat_identification.py` to identify candidate repeat based on the number of connections in the de bruijn graph and presence in the final assembly. The output `repeat_candidate.tsv` includes the kmer coverage and length for each candidate contig as well as the coverage for immediate neighbour contigs.
 
 <img src="./example_repeat.png" width="450" height="270">
+
+The highlighted contigs in red satisfy the criteria defined in (1).
 
 (4) Manually inspected the length, coverage of candidate repeats in the spreadsheet. Then extract the sequences in fasta format.
 
