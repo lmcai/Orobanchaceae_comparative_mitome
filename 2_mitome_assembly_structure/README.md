@@ -68,7 +68,7 @@ grep '^L' Pedicularis_attollens_LM040.gfa | awk '{print $2,$4}' | sed 's/_/\'$'\
 
 (3) Then use the script `de_bruijn_graph_based_repeat_identification.py` to identify candidate repeat based on the number of connections in the de bruijn graph and presence in the final assembly. The output `repeat_candidate.tsv` includes the kmer coverage and length for each candidate contig as well as the coverage for immediate neighbour contigs.
 
-<img src="./example_repeat.png" width="150" height="90">
+<img src="./example_repeat.png" width="450" height="270">
 
 (4) Manually inspected the length, coverage of candidate repeats in the spreadsheet. Then extract the sequences in fasta format.
 
