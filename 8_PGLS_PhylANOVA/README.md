@@ -6,4 +6,4 @@ The age of six nodes was fixed based on Mortimer et al 2022. TreePL was run thre
 
 ## Hypothesis testing with phylogenetic ANOVA and PGLS
 
-The input data matrix is available in `genomesize_hemiholo_HGT.csv`. The statistical analysis is completed using `PGLS_phylAnova.R`.
+The input data matrix is available in `hemiholo_traits.csv`. The statistical analysis is completed using `PGLS_phylAnova.R`.
