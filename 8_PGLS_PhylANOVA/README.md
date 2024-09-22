@@ -9,7 +9,39 @@ The age of six key nodes was fixed based on Mortimer et al 2022. TreePL was run 
 
 **2. Heterotrophic angiosperms**
 
-List of 19 species was uploaded to timetree 5 (https://timetree.org/) to generate an ultrametric tree `heterotrophic_angiosperm`. Time tree consolidates age estimates from literature to generate a dated phylogeny for selected species.
+A quick and dirty mitochondrial phylogeny of all 19 species was generated using the PhyloHerb pipeline:
+
+```
+python ~/Documents/GitHub/PhyloHerb/phyloherb.py -m ortho -i MTPT_other_order -suffix .mt.fasta -mito -o test
+```
+mtDNA was aligned with MAFFT and concatenated with [catfasta2phyml](https://github.com/nylander/catfasta2phyml), a ML tree was inferred in IQTREE2 with ModelFinder to determine the best substitution model. 
+```
+mafft atp1.fas >atp1.aln.fas
+...
+
+catfasta2phyml.pl -c *.fas > other_heterotrophic_angiosperm.phy 2> partitions.txt
+iqtree2 -s other_heterotrophic_angiosperm.phy -p partitions.txt
+```
+
+An ultrametric tree was generated in ape with relaxed , root age fixed at 105.4 Ma accoding to Magallón et al. (2015)
+```
+library(ape)
+t=read.tree('other_heterotrophic_angio.roote.tre')
+mycalibration <- makeChronosCalib(t, node="root", age.max=105.4)
+
+#correlated model
+mytimetree <- chronos(t, lambda = 1, model = "correlated", calibration = mycalibration, control = chronos.control() )
+#log-Lik = -1.73748 ; PHIIC = 123.48 
+
+#discrete mode
+mytimetree <- chronos(t, lambda = 1, model = "discrete", calibration = mycalibration, control = chronos.control() )
+#log-Lik = -1.800698 ; PHIIC = 81.6
+
+#relaxed model
+mytimetree <- chronos(t, lambda = 1, model = "relaxed", calibration = mycalibration, control = chronos.control() )
+#log-Lik = -1.886355 ; PHIIC = 126.25 
+```
+The correlated model has the highest log-like and the time tree was selected for PhylANOVA `other_heterotrophic_angio.chronos.tre`.
 
 ## Hypothesis testing with phylogenetic ANOVA and PGLS
 
