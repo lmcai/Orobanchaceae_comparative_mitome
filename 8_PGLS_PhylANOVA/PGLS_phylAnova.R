@@ -97,9 +97,38 @@ Pairwise corrected P-values:
 1 0.019 1.000
 ---------
 
+#######################################################################
+#Figure 2A: PhyloANOVA of hgt_mtpt in fully heterotrophic plant in other angiosperm orders
 
+data2 <- read.csv("heterotrophic_angiosperm_mtpt.csv",row.names = 1)
+data2$Lifestyle=as.factor(data2$Lifestyle)
+phy_tree2=read.tree('other_heterotrophic_angio.chronos.tre')
+phy_tree2$node.label<-NULL
+name.check(data2,phy_tree2)
+phylANOVA(phy_tree2, data2$Lifestyle, data2$mtpt_perc, nsim=1000, posthoc=TRUE, p.adj="holm")
 
+ANOVA table: Phylogenetic ANOVA
 
+Response: y
+           Sum Sq  Mean Sq  F value Pr(>F)
+x        0.004561 0.004561 7.200591  0.012
+Residual 0.010768 0.000633                
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+          non-photo     photo
+non-photo  0.000000 -2.683392
+photo      2.683392  0.000000
+
+Pairwise corrected P-values:
+          non-photo photo
+non-photo     1.000 0.012
+photo         0.012 1.000
+---------
 ##########################
 #Figure S8: PGLS hgt ~ mt genome size
 #check hgt ~ mt genome size without phylogeny
