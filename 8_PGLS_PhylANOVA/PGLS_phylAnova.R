@@ -69,7 +69,35 @@ Pairwise corrected P-values:
 ---------
 
 #######################################################################
-#Figure 2A: PhyloANOVA of hgt_mtpt in hemi vs holo
+#PhyloANOVA of RNA editing in hemi vs holo
+data$Class_code=as.factor(data$Class_code)
+phylANOVA(phy_tree, data$Class_code, data$rna_editing, nsim=1000, posthoc=TRUE, p.adj="holm")
+
+ANOVA table: Phylogenetic ANOVA
+
+Response: y
+            Sum Sq   Mean Sq  F value Pr(>F)
+x         575.6728 575.67283 8.299574  0.289
+Residual 2705.1077  69.36173                
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+          0        1
+0  0.000000 2.880898
+1 -2.880898 0.000000
+
+Pairwise corrected P-values:
+      0     1
+0 1.000 0.289
+1 0.289 1.000
+---------
+
+#######################################################################
+#Figure 2A: PhyloANOVA of mtpt in hemi vs holo
 
 data$Class_code=as.factor(data$Class_code)
 phylANOVA(phy_tree, data$Class_code, data$mtpt_perc, nsim=1000, posthoc=TRUE, p.adj="holm")
@@ -129,7 +157,7 @@ Pairwise corrected P-values:
 non-photo     1.000 0.012
 photo         0.012 1.000
 ---------
-##########################
+########################################
 #Figure S8: PGLS hgt ~ mt genome size
 #check hgt ~ mt genome size without phylogeny
 #see a potential bug solution from https://stackoverflow.com/questions/63138372/error-running-pgls-in-ape-no-covariate-specified
