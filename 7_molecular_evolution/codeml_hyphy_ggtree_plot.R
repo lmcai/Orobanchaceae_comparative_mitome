@@ -18,7 +18,7 @@ ml <- read.codeml('~/Dropbox/Parasitic_plant_mitonuclear_coevolution/Molecular_e
 
 #dN/dS
 pdf(file='dN_vs_dS.pdf',width=5,height=8)
-ggtree(ml, aes(color=dN_vs_dS),branch.length='dN_vs_dS') + 
+ggtree(ml, aes(color=dN_vs_dS)) + 
     scale_color_continuous(name='dN/dS', limits=c(0, 1.5),
     oob=scales::squish, low='dark blue', high='red') +
     theme_tree2(legend.position=c(.9, .2))+geom_tiplab()
@@ -27,7 +27,7 @@ dev.off()
 #dN
 pdf(file='dN.pdf',width=5,height=8)
 ggtree(ml, aes(color=dN)) + 
-    scale_color_continuous(name='dN/dS',
+    scale_color_continuous(name='dN',
     oob=scales::squish, low='dark blue', high='red') +
     theme_tree2(legend.position=c(.9, .2))+geom_tiplab()
 dev.off()
@@ -35,7 +35,7 @@ dev.off()
 #dS
 pdf(file='dS.pdf',width=5,height=8)
 ggtree(ml, aes(color=dS)) + 
-    scale_color_continuous(name='dN/dS',
+    scale_color_continuous(name='dS',
     oob=scales::squish, low='dark blue', high='red') +
     theme_tree2(legend.position=c(.9, .2))+geom_tiplab()
 dev.off()
