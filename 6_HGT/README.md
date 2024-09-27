@@ -18,7 +18,7 @@ c. Run HGTScanner
 python HGTscanner_mt.py -q [query assembly] -ref oro_mt.fas -o [output prefix] -f Orobanchaceae -b mask.bed
 ```
 
-d. Output: This will generate a `[prefix]_HGTscanner_supporting_files` folder containing multiple fasta files of homologous regions
+d. Output: This will generate a `[prefix].alnmap.bed` and a `[prefix]_HGTscanner_supporting_files` folder containing multiple fasta files of homologous regions
 
 3. Sequence alignment and phylogeny
 
@@ -28,4 +28,11 @@ mafft --localpair --maxiterate 1000 --quiet --adjustdirection [prefix].hgt.1.fas
 iqtree2 -B 1000 -T 4 -redo -s [prefix].hgt.1.aln.fas
 ```
 
-4. 
+4. Use `HGTclassifier.py` to classify VGT vs HGT
+
+Navigate to the same folder where `[prefix].alnmap.bed` and `[prefix]_HGTscanner_supporting_files` are stored
+```
+python HGTclassifier.py [prefix]
+```
+
+This will generate a `[prefix].hgt.sum.tsv` file will all information.
