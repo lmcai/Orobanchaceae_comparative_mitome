@@ -17,7 +17,15 @@ c. Run HGTScanner
 ```
 python HGTscanner_mt.py -q [query assembly] -ref oro_mt.fas -o [output prefix] -f Orobanchaceae -b mask.bed
 ```
+You will see screen output like this:
+```
+2024-09-27 10:22:48.171531	Masking query sequence Lathraea_clandestina.fasta using the bed file: Lathraea_clandestina.mtpt.bed
+2024-09-27 10:22:48.187107	Added custom reference all_mt.fas to the NCBI Viridiplantae mitochondrial database
+2024-09-27 10:25:15.144927	BLAST completed for Lcl
+2024-09-27 10:25:15.961650	Found 259 homologous genetic blocks for further examination
+2024-09-27 10:25:45.576814	Extracting sequences from homologous genetic block #4
 
+```
 d. Output: This will generate a `[prefix].alnmap.bed` and a `[prefix]_HGTscanner_supporting_files` folder containing multiple fasta files of homologous regions
 
 3. Sequence alignment and phylogeny
