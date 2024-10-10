@@ -448,6 +448,41 @@ Residual standard error: 0.006638 on 8 degrees of freedom
 Multiple R-squared: 0.206,	Adjusted R-squared: 0.1068 
 F-statistic: 2.076 on 1 and 8 DF,  p-value: 0.1876 
 
+###############################
+#RNA editing vs ds
+
+phy_tree=read.tree('round3.mt37g_44sp.treePL.tre')
+phy_tree$node.label<-NULL
+data <- read.csv("hemiholo_traits.csv",row.names = 1)
+data$Class_code=as.factor(data$Class_code)
+data=data[data$Species_dup %in% phy_tree$tip.label,]
+comp.data<-comparative.data(phy_tree, data, names.col="Species_dup", vcv.dim=2)
+
+model<-pgls(dS_rehmannia~rna_editing, data=comp.data)
+Call:
+pgls(formula = dS_rehmannia ~ rna_editing, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-1.711e-03 -8.170e-04  1.609e-05  8.159e-04  1.847e-03 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+               Estimate  Std. Error t value  Pr(>|t|)    
+(Intercept)  0.23153084  0.05074969  4.5622 0.0005331 ***
+rna_editing -0.00054927  0.00012767 -4.3022 0.0008597 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.001077 on 13 degrees of freedom
+Multiple R-squared: 0.5874,	Adjusted R-squared: 0.5557 
+F-statistic: 18.51 on 1 and 13 DF,  p-value: 0.0008597 
+
 ###################################################
 #Data visualization
 #boxplot of consolidated hgt+mtpt content
