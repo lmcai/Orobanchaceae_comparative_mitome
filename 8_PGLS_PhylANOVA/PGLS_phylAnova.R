@@ -221,6 +221,232 @@ Residual standard error: 20180 on 39 degrees of freedom
 Multiple R-squared: 0.4199,	Adjusted R-squared: 0.405 
 F-statistic: 28.23 on 1 and 39 DF,  p-value: 4.643e-06 
 
+#######################
+#Fig.4 holoparasitic species
+###########################
+#Fig. 4A pt_omega vs pt_omega
+library(caper)
+phy_tree=read.tree('holo_only.tre')
+phy_tree$node.label<-NULL
+data <- read.csv("hemiholo_traits.csv",row.names = 1)
+data$Class_code=as.factor(data$Class_code)
+data=data[data$Species_dup %in% phy_tree$tip.label,]
+comp.data<-comparative.data(phy_tree, data, names.col="Species_dup", vcv.dim=2)
+model<-pgls(dS_rehmannia~dS_pt_rehmannia, data=comp.data)
+
+Call:
+pgls(formula = dS_rehmannia ~ dS_pt_rehmannia, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-8.836e-04 -1.478e-04  6.965e-05  3.033e-04  5.532e-04 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)
+(Intercept)     0.0060486  0.0050566  1.1962   0.3175
+dS_pt_rehmannia 0.0368587  0.0203889  1.8078   0.1684
+
+Residual standard error: 0.0006339 on 3 degrees of freedom
+Multiple R-squared: 0.5214,	Adjusted R-squared: 0.3618 
+F-statistic: 3.268 on 1 and 3 DF,  p-value: 0.1684 
+
+###########################
+#Fig. 4B pt_omega vs pt_omega
+model<-pgls(dN.dS_pt_rehmannia~dN.dS_rehmannia, data=comp.data)
+Call:
+pgls(formula = dN.dS_pt_rehmannia ~ dN.dS_rehmannia, data = comp.data)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.006288 -0.003055  0.003540  0.003558  0.003824 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)      0.27588    0.12500  2.2070   0.1144
+dN.dS_rehmannia -0.08228    0.29103 -0.2827   0.7958
+
+Residual standard error: 0.005437 on 3 degrees of freedom
+Multiple R-squared: 0.02595,	Adjusted R-squared: -0.2987 
+F-statistic: 0.07993 on 1 and 3 DF,  p-value: 0.7958 
+###############################
+#Fig. 4C mt_omega vs mt_dS
+model<-pgls(dS_rehmannia~dN.dS_rehmannia, data=comp.data)
+Call:
+pgls(formula = dS_rehmannia ~ dN.dS_rehmannia, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0005822 -0.0002895  0.0001970  0.0003563  0.0004421 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)  
+(Intercept)      0.044032   0.011753  3.7465  0.03320 *
+dN.dS_rehmannia -0.070503   0.027364 -2.5765  0.08203 .
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.0005112 on 3 degrees of freedom
+Multiple R-squared: 0.6887,	Adjusted R-squared: 0.585 
+F-statistic: 6.638 on 1 and 3 DF,  p-value: 0.08203 
+
+###############################
+#Fig. 4D pt_omega vs pt_dS
+model<-pgls(dS_pt_rehmannia~dN.dS_pt_rehmannia, data=comp.data)
+Call:
+pgls(formula = dS_pt_rehmannia ~ dN.dS_pt_rehmannia, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0027842 -0.0005895  0.0001376  0.0016717  0.0026085 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                    Estimate Std. Error t value Pr(>|t|)   
+(Intercept)        -0.558364   0.062036 -9.0007 0.002895 **
+dN.dS_pt_rehmannia  3.228384   0.254687 12.6759 0.001059 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.00243 on 3 degrees of freedom
+Multiple R-squared: 0.9817,	Adjusted R-squared: 0.9756 
+F-statistic: 160.7 on 1 and 3 DF,  p-value: 0.001059 
+
+#######################
+#Fig.4 hemiparasitic species
+###############################
+phy_tree=read.tree('hemi_only.tre')
+phy_tree$node.label<-NULL
+data <- read.csv("hemiholo_traits.csv",row.names = 1)
+data$Class_code=as.factor(data$Class_code)
+data=data[data$Species_dup %in% phy_tree$tip.label,]
+comp.data<-comparative.data(phy_tree, data, names.col="Species_dup", vcv.dim=2)
+
+###############################
+#Fig. 4A
+model<-pgls(dS_rehmannia~dS_pt_rehmannia, data=comp.data)
+Call:
+pgls(formula = dS_rehmannia ~ dS_pt_rehmannia, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0019256 -0.0011998 -0.0002304  0.0004361  0.0046239 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)     0.006706   0.015297  0.4384   0.6727
+dS_pt_rehmannia 0.041263   0.095212  0.4334   0.6762
+
+Residual standard error: 0.002006 on 8 degrees of freedom
+Multiple R-squared: 0.02294,	Adjusted R-squared: -0.09919 
+F-statistic: 0.1878 on 1 and 8 DF,  p-value: 0.6762 
+###############################
+#fig. 4B
+model<-pgls(dN.dS_pt_rehmannia~dN.dS_rehmannia, data=comp.data)
+
+Call:
+pgls(formula = dN.dS_pt_rehmannia ~ dN.dS_rehmannia, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0082348 -0.0020188 -0.0006753  0.0016343  0.0060139 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                 Estimate Std. Error t value  Pr(>|t|)    
+(Intercept)      0.224407   0.033170  6.7655 0.0001428 ***
+dN.dS_rehmannia -0.108135   0.076472 -1.4140 0.1950631    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.004437 on 8 degrees of freedom
+Multiple R-squared:   0.2,	Adjusted R-squared: 0.09996 
+F-statistic:     2 on 1 and 8 DF,  p-value: 0.1951 
+###############################
+#Fig. 4C
+
+model<-pgls(dS_rehmannia~dN.dS_rehmannia, data=comp.data)
+Call:
+pgls(formula = dS_rehmannia ~ dN.dS_rehmannia, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0022138 -0.0010704 -0.0001652  0.0006482  0.0043851 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)
+(Intercept)      0.020681   0.014871  1.3907   0.2018
+dN.dS_rehmannia -0.019616   0.034285 -0.5722   0.5829
+
+Residual standard error: 0.001989 on 8 degrees of freedom
+Multiple R-squared: 0.03931,	Adjusted R-squared: -0.08077 
+F-statistic: 0.3274 on 1 and 8 DF,  p-value: 0.5829 
+
+###############################
+#Fig. 4D
+model<-pgls(dS_pt_rehmannia~dN.dS_pt_rehmannia, data=comp.data)
+Call:
+pgls(formula = dS_pt_rehmannia ~ dN.dS_pt_rehmannia, data = comp.data)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0087878 -0.0034955 -0.0005754  0.0012063  0.0146093 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+                    Estimate Std. Error t value Pr(>|t|)  
+(Intercept)         0.272105   0.087843  3.0976  0.01472 *
+dN.dS_pt_rehmannia -0.681672   0.473087 -1.4409  0.18758  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.006638 on 8 degrees of freedom
+Multiple R-squared: 0.206,	Adjusted R-squared: 0.1068 
+F-statistic: 2.076 on 1 and 8 DF,  p-value: 0.1876 
 
 ###################################################
 #Data visualization
