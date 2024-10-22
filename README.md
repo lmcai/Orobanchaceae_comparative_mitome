@@ -26,15 +26,26 @@ The content of each subdirectory is listed as follows. For detailed descriptions
 
   Inference of mitochondrion- and plastid-based phylogeny
 
-- **4_molecular_evolution**
-
-  Hyphy analyses, dN/dS calculation, organelle copy number
-- **5_mt_RNA_editing**
+- **4_RNA_editing**
 
   Deepredmt, mapping of loss of RNA editing sites, ancestral sequence reconstruction
+
+- **5_mtpt**
+
+  Characterization of mitochondrial plastid DNA (MTPT)
+  
 - **6_HGT**
 
-  Mitochondrial HGT
+  Mitochondrial HGT characterization
+
+- **7_molecular_evolution**
+
+  Hyphy analyses, dN/dS calculation, organelle copy number
+
+- **8_PGLS_PhylANOVA_COEVOL**
+
+  Comparative hypothesis testing using phylogenetic generalized least squares (PGLS), phylogenetic ANOVA (phylANOVA), and COEVOL.
+
 - **MISC**
 
   Unused MISC analyses
