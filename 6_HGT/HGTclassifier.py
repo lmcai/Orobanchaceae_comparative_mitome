@@ -46,7 +46,7 @@ id2sp={'Ain':"Aeginetia_indica",
 "Pat":"Pedicularis_attollens",
 "Pch":"Pedicularis_chinensis",
 "Rgl":"Rehmannia_glutinosa",
-"Lcl":"Lathraea_clandestina"
+"Lcl":"Lathraea_clandestina",
 "Lsq":"Lathraea_squamaria"
 }
 
