@@ -52,8 +52,11 @@ The input data matrix is available in `hemiholo_traits.csv`. The statistical ana
 Coevolution of nucleotide substitution and genomic traits was evaluated using COEVOL v 1.6. It is a Bayesian MCMC program for doing comparative analyses combining molecular data and quantitative traits. 
 
 **1. Prepare input**
+
 a. codon alignment
+
 b. ultrametric tree
+
 c. trait matrix (quantitative traits only)
 
 **2. Running COEVOL**
