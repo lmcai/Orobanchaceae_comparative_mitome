@@ -46,3 +46,32 @@ The correlated model has the highest log-like and the time tree was selected for
 ## Hypothesis testing with phylogenetic ANOVA and PGLS
 
 The input data matrix is available in `hemiholo_traits.csv`. The statistical analysis is completed using `PGLS_phylAnova.R`.
+
+## Coevolution of nucleotide substitution and genomic traits
+
+Coevolution of nucleotide substitution and genomic traits was evaluated using COEVOL v 1.6. It is a Bayesian MCMC program for doing comparative analyses combining molecular data and quantitative traits. 
+
+**1. Prepare input**
+a. codon alignment
+b. ultrametric tree
+c. trait matrix (quantitative traits only)
+
+**2. Running COEVOL**
+
+Combine dS, dN/dS and GC∗ in the same analysis and run two chains
+```
+coevol -d all_mt_no_ribosome.conc.phy -t round3.mt37g_43sp.treePL.tre -fixtimes -c traits4coevol.txt -dsom -gc orocdsomgc1
+```
+
+**3. Check convergence in R**
+```#R
+library(coda)
+x=read.table('orocdsomgc1.log')
+mcmc_object <- mcmc(x$V1)
+effectiveSize(mcmc_object)
+```
+
+**4. Generate covariance matrix**
+```readcoevol -x 200 orocdsomgc1
+#x is the burn-in
+```
