@@ -46,6 +46,8 @@ id2sp={'Ain':"Aeginetia_indica",
 "Pat":"Pedicularis_attollens",
 "Pch":"Pedicularis_chinensis",
 "Rgl":"Rehmannia_glutinosa",
+"Lcl":"Lathraea_clandestina"
+"Lsq":"Lathraea_squamaria"
 }
 
 #take a list of fasta headers or tree tips, return species names
