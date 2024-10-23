@@ -373,6 +373,7 @@ print(str(datetime.datetime.now())+'\tStart alignment and phylogenetic reconstru
 	#max_len=max([len(rec.seq) for rec in recs])
 	#if max_len<1500:
 	#	S="mafft --localpair --maxiterate 1000 --quiet --adjustdirection "+sp+".hgt."+str(i)+".fas | sed 's/_R_//g' > "+sp+".hgt."+str(i)+".aln.fas"
+	#	S="mafft --adjustdirection --6merpair --addfragments othersequences referencesequence > output"
 	#	os.system(S)
 	#	S="nohup iqtree -B 1000 -T 4 --quiet -m GTR+F -redo -s "+sp+".hgt."+str(i)+".aln.fas >/dev/null 2>&1"
 	#	os.system(S)
