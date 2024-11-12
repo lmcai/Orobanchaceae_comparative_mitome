@@ -73,28 +73,29 @@ Pairwise corrected P-values:
 library(phytools)
 data$Class_code=as.factor(data$Class_code)
 
-phylANOVA(phy_tree, data$Class_code, data$synt_w_Reh, nsim=1000, posthoc=TRUE, p.adj="holm")
+phylANOVA(phy_tree, data$Class_code, data$synt_w_Reh_size/data$mt_size, nsim=1000, posthoc=TRUE, p.adj="hochberg")
 ANOVA table: Phylogenetic ANOVA
 
 Response: y
-              Sum Sq    Mean Sq  F value Pr(>F)
-x         3561709434 3561709434 9.465076  0.236
-Residual 15052005752  376300144                
+           Sum Sq  Mean Sq   F value Pr(>F)
+x        0.253361 0.253361 21.848527   0.05
+Residual 0.463850 0.011596                 
 
 P-value based on simulation.
 ---------
 
-Pairwise posthoc test using method = "holm"
+Pairwise posthoc test using method = "hochberg"
 
 Pairwise t-values:
           0        1
-0  0.000000 3.076536
-1 -3.076536 0.000000
+0  0.000000 4.674241
+1 -4.674241 0.000000
 
 Pairwise corrected P-values:
-      0     1
-0 1.000 0.236
-1 0.236 1.000
+     0    1
+0 1.00 0.05
+1 0.05 1.00
+---------
 -
 #######################################################################
 #PhyloANOVA of RNA editing in hemi vs holo
