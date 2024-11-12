@@ -69,6 +69,34 @@ Pairwise corrected P-values:
 ---------
 
 #######################################################################
+#PhyloANOVA of syntenic regions compared to Rehmania in hemi vs holo
+library(phytools)
+data$Class_code=as.factor(data$Class_code)
+
+phylANOVA(phy_tree, data$Class_code, data$synt_w_Reh, nsim=1000, posthoc=TRUE, p.adj="holm")
+ANOVA table: Phylogenetic ANOVA
+
+Response: y
+              Sum Sq    Mean Sq  F value Pr(>F)
+x         3561709434 3561709434 9.465076  0.236
+Residual 15052005752  376300144                
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+          0        1
+0  0.000000 3.076536
+1 -3.076536 0.000000
+
+Pairwise corrected P-values:
+      0     1
+0 1.000 0.236
+1 0.236 1.000
+-
+#######################################################################
 #PhyloANOVA of RNA editing in hemi vs holo
 data$Class_code=as.factor(data$Class_code)
 phylANOVA(phy_tree, data$Class_code, data$rna_editing, nsim=1000, posthoc=TRUE, p.adj="holm")
