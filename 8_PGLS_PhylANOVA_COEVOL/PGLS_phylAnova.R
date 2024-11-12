@@ -250,6 +250,32 @@ Residual standard error: 20180 on 39 degrees of freedom
 Multiple R-squared: 0.4199,	Adjusted R-squared: 0.405 
 F-statistic: 28.23 on 1 and 39 DF,  p-value: 4.643e-06 
 
+#########################
+#HGT percantage between hemi and holo
+phylANOVA(phy_tree, data$Class_code, data$hgt_perc, nsim=1000, posthoc=TRUE, p.adj="holm")
+ANOVA table: Phylogenetic ANOVA
+
+Response: y
+           Sum Sq   Mean Sq   F value Pr(>F)
+x        578.3329 578.33286 26.540366   0.048
+Residual 871.6276  21.79069                 
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+         0         1
+0 0.000000 -5.151734
+1 5.151734  0.000000
+
+Pairwise corrected P-values:
+     0    1
+0 1.00 0.048
+1 0.05 1.00
+---------
+
 #######################
 #Fig.4 holoparasitic species
 ###########################
