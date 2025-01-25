@@ -47,7 +47,7 @@ The content of each subdirectory is listed as follows. For detailed descriptions
   Comparative analysis and hypothesis testing using PGLS, phylogenetic ANOVA, and COEVOL 
   Comparative hypothesis testing using phylogenetic generalized least squares (PGLS), phylogenetic ANOVA (phylANOVA), and COEVOL.
 
-- **MISC**
+## MISC
 
   Unused MISC analyses
 
