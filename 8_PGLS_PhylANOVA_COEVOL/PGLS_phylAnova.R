@@ -279,7 +279,7 @@ Pairwise corrected P-values:
 #######################
 #Fig.4 holoparasitic species
 ###########################
-#Fig. 4A pt_omega vs pt_omega
+#Fig. 4A pt_dS vs pt_dS
 library(caper)
 phy_tree=read.tree('holo_only.tre')
 phy_tree$node.label<-NULL
@@ -311,6 +311,56 @@ Residual standard error: 0.0006339 on 3 degrees of freedom
 Multiple R-squared: 0.5214,	Adjusted R-squared: 0.3618 
 F-statistic: 3.268 on 1 and 3 DF,  p-value: 0.1684 
 
+#check if hemi- and holo differ in plastid ds
+phylANOVA(phy_tree, data$Class_code, data$dS_pt_rehmannia, nsim=1000, posthoc=TRUE, p.adj="holm")
+
+ANOVA table: Phylogenetic ANOVA
+
+Response: y
+           Sum Sq  Mean Sq   F value Pr(>F)
+x        0.062734 0.062734 28.975001  0.034
+Residual 0.086605 0.002165                 
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+         0         1
+0 0.000000 -5.382843
+1 5.382843  0.000000
+
+Pairwise corrected P-values:
+      0     1
+0 1.000 0.034
+1 0.034 1.000
+---------
+
+#check if hemi- and holo differ in mt ds
+phylANOVA(phy_tree, data$Class_code, data$dS_rehmannia, nsim=1000, posthoc=TRUE, p.adj="holm")
+ANOVA table: Phylogenetic ANOVA
+
+Response: y
+           Sum Sq  Mean Sq  F value Pr(>F)
+x        0.000118 0.000118 4.012723  0.455
+Residual 0.001177 0.000029                
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+         0         1
+0 0.000000 -2.003178
+1 2.003178  0.000000
+
+Pairwise corrected P-values:
+      0     1
+0 1.000 0.455
+1 0.455 1.000
+---------
 ###########################
 #Fig. 4B pt_omega vs pt_omega
 model<-pgls(dN.dS_pt_rehmannia~dN.dS_rehmannia, data=comp.data)
@@ -335,6 +385,62 @@ dN.dS_rehmannia -0.08228    0.29103 -0.2827   0.7958
 Residual standard error: 0.005437 on 3 degrees of freedom
 Multiple R-squared: 0.02595,	Adjusted R-squared: -0.2987 
 F-statistic: 0.07993 on 1 and 3 DF,  p-value: 0.7958 
+
+#check if hemi- and holo differ in plastid omega
+#remove outlier monochasma
+temp=data
+temp=temp[-41,]
+temp_tree=drop.tip(phy_tree,'Monochasma_japonicum')
+phylANOVA(temp_tree, temp$Class_code, temp$dN.dS_pt_rehmannia, nsim=1000, posthoc=TRUE, p.adj="holm")
+ANOVA table: Phylogenetic ANOVA
+
+Response: y
+          Sum Sq  Mean Sq   F value Pr(>F)
+x        0.06656 0.066560 75.371773  0.001
+Residual 0.03444 0.000883                 
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+         0         1
+0 0.000000 -8.681692
+1 8.681692  0.000000
+
+Pairwise corrected P-values:
+      0     1
+0 1.000 0.001
+1 0.001 1.000
+---------
+
+#check if hemi- and holo differ in mitochondrial omega
+phylANOVA(phy_tree, data$Class_code, data$dN.dS_rehmannia, nsim=1000, posthoc=TRUE, p.adj="holm")
+
+ANOVA table: Phylogenetic ANOVA
+
+Response: y
+           Sum Sq  Mean Sq  F value Pr(>F)
+x        0.008539 0.008539 1.960449  0.605
+Residual 0.174221 0.004356                
+
+P-value based on simulation.
+---------
+
+Pairwise posthoc test using method = "holm"
+
+Pairwise t-values:
+        0        1
+0 0.00000 -1.40016
+1 1.40016  0.00000
+
+Pairwise corrected P-values:
+      0     1
+0 1.000 0.605
+1 0.605 1.000
+---------
+
 ###############################
 #Fig. 4C mt_omega vs mt_dS
 model<-pgls(dS_rehmannia~dN.dS_rehmannia, data=comp.data)
