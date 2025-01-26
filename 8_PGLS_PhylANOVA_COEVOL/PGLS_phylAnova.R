@@ -644,6 +644,35 @@ Residual standard error: 0.001077 on 13 degrees of freedom
 Multiple R-squared: 0.5874,	Adjusted R-squared: 0.5557 
 F-statistic: 18.51 on 1 and 13 DF,  p-value: 0.0008597 
 
+
+########################
+#holoparasite MTPT reduction and plastid genome size
+sub=data[data$Class=='holo',]
+tip2drop=setdiff(phy_tree$tip.label, sub$Species_dup)
+pruned_tree <- drop.tip(phy_tree, tip2drop)
+comp.data<-comparative.data(pruned_tree, sub, names.col="Species_dup", vcv.dim=2)
+model<-pgls(mtpt_perc~pt_size, data=comp.data)
+Call:
+pgls(formula = mtpt_perc ~ pt_size, data = comp.data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.15783 -0.06314  0.01149  0.06414  0.09287 
+
+Branch length transformations:
+
+kappa  [Fix]  : 1.000
+lambda [Fix]  : 1.000
+delta  [Fix]  : 1.000
+
+Coefficients:
+               Estimate  Std. Error t value Pr(>|t|)
+(Intercept) -8.4169e-01  1.4776e+00 -0.5696   0.6264
+pt_size      1.3827e-05  1.4877e-05  0.9295   0.4508
+
+Residual standard error: 0.1369 on 2 degrees of freedom
+Multiple R-squared: 0.3016,	Adjusted R-squared: -0.04753 
+F-statistic: 0.8639 on 1 and 2 DF,  p-value: 0.4508 
 ###################################################
 #Data visualization
 #boxplot of consolidated hgt+mtpt content
