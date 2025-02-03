@@ -76,7 +76,7 @@ for i in range(1,order):
 	b=SeqIO.index(sp+".gt."+str(i)+".aln.fas",'fasta')
 	q=loci[i-1].split()[0]
 	if len(b[q].seq)<10000:
-		S="nohup iqtree -B 1000 -T 4 --quiet -m GTR+F -redo -s "+sp+".gt."+str(i)+".aln.fas >/dev/null 2>&1"
+		S="nohup iqtree -B 1000 -T 4 --quiet -redo -s "+sp+".gt."+str(i)+".aln.fas >/dev/null 2>&1"
 		os.system(S)
 		print(str(datetime.datetime.now())+'\tLoci #'+str(i))
 	else:print(str(datetime.datetime.now())+'\tLoci #'+str(i)+' is longer than 10kb. Skip tree building. Check manually.')
