@@ -5,6 +5,9 @@ Citation:
 
 Reach out to Liming Cai (daybreak.chua@gmail.com) for any questions
 
+The data supporting the findings of this study, including genome assemblies, annotations, gene alignments, and phylogenies for the study of RNA editing, molecular evolution, and gene transfers are available in the Figshare Digital Repository (###).
+
+
 Description of the subdirectories
 ----------------------
 The content of each subdirectory is listed as follows. For detailed descriptions and scripts, please see the README file within each directory.
