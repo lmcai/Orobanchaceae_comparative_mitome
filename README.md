@@ -1,7 +1,7 @@
 # Orobanchaceae_comparative_mitome
 Scripts used in the comparative genome study of mitochondrial genome evolution in the parasitic Orobanchaceae
 
-Citation: Recombination and retroprocessing in broomrapes reveal a universal roadmap for mitochondrial evolution in heterotrophic plants. L., Cai, J.C., Havird, R.K., Jansen. 
+Citation: Recombination and retroprocessing in broomrapes reveal a universal roadmap for mitochondrial evolution in heterotrophic plants. L., Cai, J.C., Havird, R.K., Jansen. biorxiv. doi: https://doi.org/10.1101/2025.02.14.637881
 
 
 Reach out to Liming Cai (daybreak.chua@gmail.com) for any questions
