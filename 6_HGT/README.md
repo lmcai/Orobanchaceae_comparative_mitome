@@ -1,4 +1,6 @@
 # HGT identification
+## Disclaimer
+This version of HGTScanner was only used to detect HGTs in plant mitochondria using the methods described in the original paper. It was customized for Orobanchaceae. Liming is actively generalizing HGTScanner as a standalone tool for HGT detection. Check out the updates on this GitHub repository https://github.com/lmcai/HGTScanner.
 
 HGTScanner_mt was used to identify homology, build phylogeny, and classify loci.
 
